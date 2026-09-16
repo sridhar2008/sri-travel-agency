@@ -52,5 +52,15 @@
     "phone": "9123456780",
     "destination": "Kerala",
     "message": "Exact server validation"
+  },
+  {
+    "id": "demo-user-ananya-sharma",
+    "type": "contact",
+    "createdAt": "2026-09-16T18:00:00.000Z",
+    "email": "ananya.sharma@example.com",
+    "name": "Ananya Sharma",
+    "phone": "9000012345",
+    "destination": "Maldives",
+    "message": "I am planning a relaxing five-day Maldives trip for two people in December. Please share honeymoon package options."
   }
 ]
