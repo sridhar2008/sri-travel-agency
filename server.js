@@ -6,6 +6,9 @@ const crypto = require('node:crypto');
 const PORT = Number(process.env.PORT) || 3000;
 const ROOT_DIR = __dirname;
 const DATA_FILE = path.join(ROOT_DIR, 'data', 'submissions.json');
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'sridharagency';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'asdfghjkl';
+const adminSessions = new Map();
 const STATIC_TYPES = {
   '.css': 'text/css; charset=utf-8',
   '.html': 'text/html; charset=utf-8',
@@ -46,6 +49,55 @@ const saveSubmission = async (submission) => {
   }
   submissions.push(submission);
   await fs.writeFile(DATA_FILE, `${JSON.stringify(submissions, null, 2)}\n`, 'utf8');
+};
+
+const readSubmissions = async () => {
+  try {
+    const submissions = JSON.parse(await fs.readFile(DATA_FILE, 'utf8'));
+    return Array.isArray(submissions) ? submissions : [];
+  } catch (error) {
+    if (error.code === 'ENOENT') return [];
+    throw error;
+  }
+};
+
+const getAdminToken = (request) => {
+  const authorization = request.headers.authorization || '';
+  return authorization.startsWith('Bearer ') ? authorization.slice(7) : '';
+};
+
+const isAdmin = (request) => {
+  const token = getAdminToken(request);
+  const expiresAt = adminSessions.get(token);
+  if (!expiresAt || expiresAt < Date.now()) {
+    adminSessions.delete(token);
+    return false;
+  }
+  return true;
+};
+
+const handleAdminLogin = async (request, response) => {
+  let payload;
+  try {
+    payload = JSON.parse(await readRequestBody(request));
+  } catch {
+    return sendJson(response, 400, { error: 'Please send valid JSON.' });
+  }
+  if (payload.username !== ADMIN_USERNAME || payload.password !== ADMIN_PASSWORD) {
+    return sendJson(response, 401, { error: 'Invalid admin credentials.' });
+  }
+  const token = crypto.randomBytes(32).toString('hex');
+  adminSessions.set(token, Date.now() + 8 * 60 * 60 * 1000);
+  return sendJson(response, 200, { token });
+};
+
+const handleAdminSubmissions = async (request, response) => {
+  if (!isAdmin(request)) return sendJson(response, 401, { error: 'Admin login required.' });
+  try {
+    return sendJson(response, 200, { submissions: await readSubmissions() });
+  } catch {
+    return sendJson(response, 500, { error: 'Unable to load submissions.' });
+  }
 };
 
 const handleSubmission = async (request, response, type) => {
@@ -95,6 +147,12 @@ const serveStatic = async (request, response) => {
 };
 
 const server = http.createServer((request, response) => {
+  if (request.method === 'POST' && request.url === '/api/admin/login') {
+    return handleAdminLogin(request, response);
+  }
+  if (request.method === 'GET' && request.url === '/api/admin/submissions') {
+    return handleAdminSubmissions(request, response);
+  }
   if (request.method === 'POST' && request.url === '/api/newsletter') {
     return handleSubmission(request, response, 'newsletter');
   }

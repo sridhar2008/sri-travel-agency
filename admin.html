@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sri Explore Admin</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <main class="admin-shell">
+    <section class="login-panel" id="loginPanel">
+      <p class="eyebrow">SRI EXPLORE</p>
+      <h1>Admin sign in</h1>
+      <p class="muted">Manage travel enquiries and newsletter subscribers.</p>
+      <form id="loginForm">
+        <label for="username">Username</label>
+        <input id="username" name="username" autocomplete="username" required>
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+        <button type="submit">Sign in</button>
+        <p class="form-message" id="loginMessage" role="alert"></p>
+      </form>
+    </section>
+
+    <section class="dashboard" id="dashboard" hidden>
+      <header class="dashboard-header">
+        <div>
+          <p class="eyebrow">SRI EXPLORE</p>
+          <h1>Submissions</h1>
+        </div>
+        <button class="secondary" id="logoutButton" type="button">Log out</button>
+      </header>
+      <div class="summary" id="summary"></div>
+      <p class="form-message" id="dashboardMessage" role="alert"></p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Destination</th>
+              <th>Message</th>
+              <th>Received</th>
+            </tr>
+          </thead>
+          <tbody id="submissionsBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+  <script src="admin.js"></script>
+</body>
+</html>
