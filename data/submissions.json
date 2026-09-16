@@ -1,0 +1,56 @@
+[
+  {
+    "id": "mu4d7slq",
+    "type": "newsletter",
+    "createdAt": "2026-09-16T17:19:03.566Z",
+    "email": "smoke-test@example.com"
+  },
+  {
+    "id": "mu4d7sls",
+    "type": "contact",
+    "createdAt": "2026-09-16T17:19:03.568Z",
+    "name": "Smoke Test",
+    "email": "smoke-test@example.com",
+    "phone": "1234567890",
+    "destination": "Goa",
+    "message": "Test enquiry"
+  },
+  {
+    "id": "mu4dmkc5",
+    "type": "newsletter",
+    "createdAt": "2026-09-16T17:30:32.693Z",
+    "email": "validation-20260916@example.com"
+  },
+  {
+    "id": "mu4dnuu4",
+    "type": "newsletter",
+    "createdAt": "2026-09-16T17:31:32.956Z",
+    "email": "validation-20260916@example.com"
+  },
+  {
+    "id": "mu4dnuuk",
+    "type": "contact",
+    "createdAt": "2026-09-16T17:31:32.972Z",
+    "email": "validation-20260916@example.com",
+    "message": "Backend validation enquiry",
+    "name": "Validation User",
+    "destination": "Goa",
+    "phone": "9876543210"
+  },
+  {
+    "id": "08c4a6de-dd47-4843-9240-f1bd6b65c6c7",
+    "type": "newsletter",
+    "createdAt": "2026-09-16T17:31:49.284Z",
+    "email": "checked-in-20260916@example.com"
+  },
+  {
+    "id": "3fda419e-5d59-45f9-8832-5fb2df974bdf",
+    "type": "contact",
+    "createdAt": "2026-09-16T17:31:49.295Z",
+    "email": "checked-in-20260916@example.com",
+    "name": "Checked In",
+    "phone": "9123456780",
+    "destination": "Kerala",
+    "message": "Exact server validation"
+  }
+]

@@ -39,19 +39,43 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.nav-link').forEach((link) => link.addEventListener('click', () => navbar.classList.remove('nav-open')));
 
   const setMessage = (id, message) => { const element = document.getElementById(id); if (element) element.textContent = message; };
+  const submitToApi = async (endpoint, payload, messageId, successMessage) => {
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Unable to submit the form.');
+      setMessage(messageId, successMessage);
+      return true;
+    } catch (error) {
+      setMessage(messageId, error.message || 'Unable to submit the form.');
+      return false;
+    }
+  };
   document.getElementById('searchForm')?.addEventListener('submit', (event) => {
     event.preventDefault();
     const destination = document.getElementById('searchDestination').value;
     setMessage('searchResult', destination ? `Great choice. Showing trips for ${destination}.` : 'Please choose a destination to search.');
   });
-  document.getElementById('newsletterForm')?.addEventListener('submit', (event) => {
+  document.getElementById('newsletterForm')?.addEventListener('submit', async (event) => {
     event.preventDefault();
     const email = document.getElementById('newsletterEmail').value.trim();
-    setMessage('newsletterMessage', email.includes('@') ? 'Thanks. Travel inspiration is on its way.' : 'Please enter a valid email address.');
+    if (!email.includes('@')) return setMessage('newsletterMessage', 'Please enter a valid email address.');
+    await submitToApi('/api/newsletter', { email }, 'newsletterMessage', 'Thanks. Travel inspiration is on its way.');
   });
-  document.getElementById('contactForm')?.addEventListener('submit', (event) => {
+  document.getElementById('contactForm')?.addEventListener('submit', async (event) => {
     event.preventDefault();
-    setMessage('contactMessageResult', 'Thank you. Our travel team will contact you soon.');
+    const payload = {
+      name: document.getElementById('contactName').value,
+      email: document.getElementById('contactEmail').value,
+      phone: document.getElementById('contactPhone').value,
+      destination: document.getElementById('contactDestination').value,
+      message: document.getElementById('contactMessage').value
+    };
+    await submitToApi('/api/contact', payload, 'contactMessageResult', 'Thank you. Our travel team will contact you soon.');
   });
 
   const packageDetails = {
