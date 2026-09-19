@@ -16,3 +16,4 @@ Open `http://localhost:3000/#admin` to sign in and view all submissions on the s
 
 - `POST /api/newsletter` with `{ "email": "traveler@example.com" }`
 - `POST /api/contact` with `{ "name": "...", "email": "...", "phone": "...", "destination": "...", "message": "..." }`
+- `DELETE /api/admin/submissions/:id` with an admin bearer token to delete a submission

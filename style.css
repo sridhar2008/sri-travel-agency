@@ -98,6 +98,8 @@ input:focus, select:focus, textarea:focus { border-color: var(--blue); }
 .admin-section th, .admin-section td { padding: 14px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; font-size: .84rem; }
 .admin-section th { color: var(--navy); background: var(--sky); font-size: .76rem; letter-spacing: .04em; text-transform: uppercase; }
 .admin-section td:nth-child(6) { min-width: 260px; }
+.admin-link { color: var(--blue); text-decoration: underline; }
+.delete-submission { padding: 7px 10px; color: #fff; background: #b42318; font-size: .75rem; }
 .badge { display: inline-block; padding: 4px 8px; border-radius: 3px; color: var(--navy); background: var(--gold); font-size: .72rem; font-weight: 800; text-transform: capitalize; }
 .badge.newsletter { background: #c7f0d8; }
 .empty { padding: 30px; color: var(--muted); text-align: center; }

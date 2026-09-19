@@ -134,6 +134,8 @@ const readSubmissions = () => database.prepare(`
   return result;
 });
 
+const deleteSubmission = (id) => database.prepare('DELETE FROM submissions WHERE id = ?').run(id).changes > 0;
+
 const getAdminToken = (request) => {
   const authorization = request.headers.authorization || '';
   return authorization.startsWith('Bearer ') ? authorization.slice(7) : '';
@@ -171,6 +173,12 @@ const handleAdminSubmissions = async (request, response) => {
   } catch {
     return sendJson(response, 500, { error: 'Unable to load submissions.' });
   }
+};
+
+const handleDeleteSubmission = (request, response, id) => {
+  if (!isAdmin(request)) return sendJson(response, 401, { error: 'Admin login required.' });
+  if (!id || !deleteSubmission(id)) return sendJson(response, 404, { error: 'Submission not found.' });
+  return sendJson(response, 200, { message: 'Submission deleted.' });
 };
 
 const handleSubmission = async (request, response, type) => {
@@ -225,6 +233,10 @@ const server = http.createServer((request, response) => {
   }
   if (request.method === 'GET' && request.url === '/api/admin/submissions') {
     return handleAdminSubmissions(request, response);
+  }
+  if (request.method === 'DELETE' && request.url.startsWith('/api/admin/submissions/')) {
+    const id = decodeURIComponent(request.url.slice('/api/admin/submissions/'.length));
+    return handleDeleteSubmission(request, response, id);
   }
   if (request.method === 'POST' && request.url === '/api/newsletter') {
     return handleSubmission(request, response, 'newsletter');
