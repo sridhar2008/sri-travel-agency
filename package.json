@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "description": "Sri Explore travel agency website and enquiry backend",
+  "engines": {
+    "node": ">=22.5.0"
+  },
   "scripts": {
     "start": "node server.js"
   }

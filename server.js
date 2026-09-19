@@ -2,10 +2,12 @@ const http = require('node:http');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const crypto = require('node:crypto');
+const { DatabaseSync } = require('node:sqlite');
 
 const PORT = Number(process.env.PORT) || 3000;
 const ROOT_DIR = __dirname;
 const DATA_FILE = path.join(ROOT_DIR, 'data', 'submissions.json');
+const DATABASE_FILE = path.join(ROOT_DIR, 'data', 'submissions.sqlite');
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'sriagency';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'asdfghjkl';
 const adminSessions = new Map();
@@ -38,8 +40,30 @@ const readRequestBody = (request) => new Promise((resolve, reject) => {
 const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 const clean = (value) => typeof value === 'string' ? value.trim() : '';
 
-const saveSubmission = async (submission) => {
-  await fs.mkdir(path.dirname(DATA_FILE), { recursive: true });
+const database = new DatabaseSync(DATABASE_FILE);
+
+const initializeDatabase = async () => {
+  await fs.mkdir(path.dirname(DATABASE_FILE), { recursive: true });
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS submissions (
+      id TEXT PRIMARY KEY,
+      type TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      email TEXT NOT NULL,
+      name TEXT,
+      phone TEXT,
+      destination TEXT,
+      message TEXT
+    );
+    CREATE TABLE IF NOT EXISTS migrations (
+      name TEXT PRIMARY KEY,
+      completed_at TEXT NOT NULL
+    );
+  `);
+
+  const migration = database.prepare('SELECT name FROM migrations WHERE name = ?').get('json-submissions');
+  if (migration) return;
+
   let submissions = [];
   try {
     submissions = JSON.parse(await fs.readFile(DATA_FILE, 'utf8'));
@@ -47,19 +71,68 @@ const saveSubmission = async (submission) => {
   } catch (error) {
     if (error.code !== 'ENOENT') throw error;
   }
-  submissions.push(submission);
-  await fs.writeFile(DATA_FILE, `${JSON.stringify(submissions, null, 2)}\n`, 'utf8');
-};
 
-const readSubmissions = async () => {
+  database.exec('BEGIN');
   try {
-    const submissions = JSON.parse(await fs.readFile(DATA_FILE, 'utf8'));
-    return Array.isArray(submissions) ? submissions : [];
+    const insert = database.prepare(`
+      INSERT INTO submissions (id, type, created_at, email, name, phone, destination, message)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    for (const submission of submissions) {
+      insert.run(
+        submission.id,
+        submission.type,
+        submission.createdAt,
+        submission.email,
+        submission.name ?? null,
+        submission.phone ?? null,
+        submission.destination ?? null,
+        submission.message ?? null
+      );
+    }
+    database.prepare('INSERT INTO migrations (name, completed_at) VALUES (?, ?)').run('json-submissions', new Date().toISOString());
+    database.exec('COMMIT');
   } catch (error) {
-    if (error.code === 'ENOENT') return [];
+    database.exec('ROLLBACK');
     throw error;
   }
 };
+
+const saveSubmission = (submission) => {
+  database.prepare(`
+    INSERT INTO submissions (id, type, created_at, email, name, phone, destination, message)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    submission.id,
+    submission.type,
+    submission.createdAt,
+    submission.email,
+    submission.name ?? null,
+    submission.phone ?? null,
+    submission.destination ?? null,
+    submission.message ?? null
+  );
+};
+
+const readSubmissions = () => database.prepare(`
+  SELECT id, type, created_at, email, name, phone, destination, message
+  FROM submissions
+  ORDER BY rowid ASC
+`).all().map((submission) => {
+  const result = {
+    id: submission.id,
+    type: submission.type,
+    createdAt: submission.created_at,
+    email: submission.email
+  };
+  if (submission.type === 'contact') {
+    result.name = submission.name || '';
+    result.phone = submission.phone || '';
+    result.destination = submission.destination || '';
+    result.message = submission.message || '';
+  }
+  return result;
+});
 
 const getAdminToken = (request) => {
   const authorization = request.headers.authorization || '';
@@ -94,7 +167,7 @@ const handleAdminLogin = async (request, response) => {
 const handleAdminSubmissions = async (request, response) => {
   if (!isAdmin(request)) return sendJson(response, 401, { error: 'Admin login required.' });
   try {
-    return sendJson(response, 200, { submissions: await readSubmissions() });
+    return sendJson(response, 200, { submissions: readSubmissions() });
   } catch {
     return sendJson(response, 500, { error: 'Unable to load submissions.' });
   }
@@ -125,7 +198,7 @@ const handleSubmission = async (request, response, type) => {
   }
 
   try {
-    await saveSubmission(submission);
+    saveSubmission(submission);
     return sendJson(response, 201, { message: 'Submission received.', submission });
   } catch {
     return sendJson(response, 500, { error: 'Unable to save your submission right now.' });
@@ -163,6 +236,11 @@ const server = http.createServer((request, response) => {
   return sendJson(response, 405, { error: 'Method not allowed.' });
 });
 
-server.listen(PORT, () => {
-  console.log(`Sri Explore backend running at http://localhost:${PORT}`);
+initializeDatabase().then(() => {
+  server.listen(PORT, () => {
+    console.log(`Sri Explore backend running at http://localhost:${PORT}`);
+  });
+}).catch((error) => {
+  console.error('Unable to initialize the database:', error);
+  process.exitCode = 1;
 });

@@ -2,7 +2,7 @@
 
 ## Run locally
 
-Requires Node.js 18 or newer.
+Requires Node.js 22.5 or newer.
 
 ```bash
 npm start
@@ -10,7 +10,7 @@ npm start
 
 Open `http://localhost:3000` in a browser. The server serves the website and saves newsletter subscriptions and contact enquiries to `data/submissions.json`.
 
-Open `http://localhost:3000/#admin` to sign in and view all submissions on the same page. Admin login: username `sriagency`, password `asdfghjkl`.
+Open `http://localhost:3000/#admin` to sign in and view all submissions on the same page. Submissions are stored in `data/submissions.sqlite`, and the existing `data/submissions.json` is imported automatically on first start. Admin login: username `sriagency`, password `asdfghjkl`.
 
 ### API
 
