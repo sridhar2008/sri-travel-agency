@@ -13,8 +13,8 @@
       <h1>Admin sign in</h1>
       <p class="muted">Manage travel enquiries and newsletter subscribers.</p>
       <form id="loginForm">
-        <label for="username">Username</label>
-        <input id="username" name="username" autocomplete="username" required>
+        <label for="username">Admin email</label>
+        <input id="username" name="username" type="email" autocomplete="username" required>
         <label for="password">Password</label>
         <input id="password" name="password" type="password" autocomplete="current-password" required>
         <button type="submit">Sign in</button>
@@ -51,6 +51,10 @@
       </div>
     </section>
   </main>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
   <script src="admin.js"></script>
 </body>
 </html>

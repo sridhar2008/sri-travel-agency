@@ -39,15 +39,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.nav-link').forEach((link) => link.addEventListener('click', () => navbar.classList.remove('nav-open')));
 
   const setMessage = (id, message) => { const element = document.getElementById(id); if (element) element.textContent = message; };
-  const submitToApi = async (endpoint, payload, messageId, successMessage) => {
+  const submitToFirebase = async (payload, messageId, successMessage) => {
     try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || 'Unable to submit the form.');
+      await firebaseDb.collection('submissions').add({ ...payload, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
       setMessage(messageId, successMessage);
       return true;
     } catch (error) {
@@ -64,18 +58,19 @@ document.addEventListener('DOMContentLoaded', () => {
     event.preventDefault();
     const email = document.getElementById('newsletterEmail').value.trim();
     if (!email.includes('@')) return setMessage('newsletterMessage', 'Please enter a valid email address.');
-    await submitToApi('/api/newsletter', { email }, 'newsletterMessage', 'Thanks. Travel inspiration is on its way.');
+    await submitToFirebase({ type: 'newsletter', email }, 'newsletterMessage', 'Thanks. Travel inspiration is on its way.');
   });
   document.getElementById('contactForm')?.addEventListener('submit', async (event) => {
     event.preventDefault();
     const payload = {
+      type: 'contact',
       name: document.getElementById('contactName').value,
       email: document.getElementById('contactEmail').value,
       phone: document.getElementById('contactPhone').value,
       destination: document.getElementById('contactDestination').value,
       message: document.getElementById('contactMessage').value
     };
-    await submitToApi('/api/contact', payload, 'contactMessageResult', 'Thank you. Our travel team will contact you soon.');
+    await submitToFirebase(payload, 'contactMessageResult', 'Thank you. Our travel team will contact you soon.');
   });
 
   const packageDetails = {

@@ -30,31 +30,23 @@ const renderSubmissions = (submissions) => {
       <td>${submission.phone ? `<a class="admin-link" href="tel:${escapeAttribute(submission.phone)}">${escapeHtml(submission.phone)}</a>` : '-'}</td>
       <td>${escapeHtml(submission.destination || '-')}</td>
       <td>${escapeHtml(submission.message || '-')}</td>
-      <td>${escapeHtml(new Date(submission.createdAt).toLocaleString())}</td>
+      <td>${escapeHtml(submission.createdAt?.toDate().toLocaleString() || '-')}</td>
       <td><button class="delete-submission" type="button" data-id="${escapeAttribute(submission.id)}">Delete</button></td>
     </tr>`).join('') : '<tr><td class="empty" colspan="8">No submissions yet.</td></tr>';
 };
 
-const loadDashboard = async (token) => {
-  const response = await fetch('/api/admin/submissions', { headers: { Authorization: `Bearer ${token}` } });
-  const result = await response.json();
-  if (!response.ok) throw new Error(result.error || 'Unable to load submissions.');
-  renderSubmissions(result.submissions);
+const loadDashboard = async () => {
+  const snapshot = await firebaseDb.collection('submissions').orderBy('createdAt', 'desc').get();
+  renderSubmissions(snapshot.docs.map((document) => ({ id: document.id, ...document.data() })));
   loginPanel.hidden = true;
   dashboard.hidden = false;
 };
 
 const deleteSubmission = async (id) => {
   if (!window.confirm('Delete this submission permanently?')) return;
-  const token = sessionStorage.getItem('adminToken');
   try {
-    const response = await fetch(`/api/admin/submissions/${encodeURIComponent(id)}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.error || 'Unable to delete submission.');
-    await loadDashboard(token);
+    await firebaseDb.collection('submissions').doc(id).delete();
+    await loadDashboard();
   } catch (error) {
     setMessage(dashboardMessage, error.message);
   }
@@ -69,32 +61,24 @@ loginForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   setMessage(loginMessage, 'Signing in...');
   try {
-    const response = await fetch('/api/admin/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: loginForm.username.value, password: loginForm.password.value })
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.error || 'Unable to sign in.');
-    sessionStorage.setItem('adminToken', result.token);
-    await loadDashboard(result.token);
+    await firebaseAuth.signInWithEmailAndPassword(loginForm.username.value, loginForm.password.value);
+    await loadDashboard();
   } catch (error) {
-    setMessage(loginMessage, error.message);
+    setMessage(loginMessage, error.code === 'auth/invalid-credential' ? 'Invalid email or password.' : error.message);
   }
 });
 
 logoutButton.addEventListener('click', () => {
-  sessionStorage.removeItem('adminToken');
+  firebaseAuth.signOut();
   loginForm.reset();
   setMessage(loginMessage, '');
   showLogin();
 });
 
-const existingToken = sessionStorage.getItem('adminToken');
-if (existingToken) {
-  loadDashboard(existingToken).catch(() => {
-    sessionStorage.removeItem('adminToken');
-    setMessage(dashboardMessage, 'Your admin session has expired.');
+firebaseAuth.onAuthStateChanged((user) => {
+  if (user) {
+    loadDashboard().catch((error) => setMessage(dashboardMessage, error.message));
+  } else {
     showLogin();
-  });
-}
+  }
+});

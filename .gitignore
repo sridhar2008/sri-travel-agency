@@ -1,2 +1,3 @@
 data/submissions.sqlite
 node_modules/
+.firebase/
