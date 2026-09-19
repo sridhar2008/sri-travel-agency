@@ -6,6 +6,7 @@ const dashboardMessage = document.getElementById('dashboardMessage');
 const submissionsBody = document.getElementById('submissionsBody');
 const summary = document.getElementById('summary');
 const logoutButton = document.getElementById('logoutButton');
+const refreshButton = document.getElementById('refreshButton');
 
 const setMessage = (element, message) => { element.textContent = message; };
 const escapeHtml = (value) => String(value || '').replace(/[&<>'"]/g, (character) => ({
@@ -36,11 +37,26 @@ const renderSubmissions = (submissions) => {
 };
 
 const loadDashboard = async () => {
+  if (!firebaseAuth.currentUser) return;
   const snapshot = await firebaseDb.collection('submissions').orderBy('createdAt', 'desc').get();
   renderSubmissions(snapshot.docs.map((document) => ({ id: document.id, ...document.data() })));
   loginPanel.hidden = true;
   dashboard.hidden = false;
 };
+
+refreshButton.addEventListener('click', async () => {
+  refreshButton.disabled = true;
+  refreshButton.textContent = 'Refreshing...';
+  setMessage(dashboardMessage, '');
+  try {
+    await loadDashboard();
+  } catch (error) {
+    setMessage(dashboardMessage, error.message);
+  } finally {
+    refreshButton.disabled = false;
+    refreshButton.textContent = 'Refresh';
+  }
+});
 
 const deleteSubmission = async (id) => {
   if (!window.confirm('Delete this submission permanently?')) return;
