@@ -24,6 +24,7 @@
         <li><a href="#experiences" class="nav-link">Experiences</a></li>
         <li><a href="#about" class="nav-link">About Us</a></li>
         <li><a href="#contact" class="nav-link">Contact</a></li>
+        <li><a href="#admin" class="nav-link">Admin</a></li>
       </ul>
     </nav>
     <a href="#packages" class="btn btn-accent nav-book">Book Now</a>
@@ -673,6 +674,52 @@
       </div>
     </div>
   </section>
+  <!-- ============================ ADMIN ============================ -->
+  <section class="admin-section section section-grey" id="admin">
+    <div class="admin-shell">
+      <section class="login-panel" id="loginPanel">
+        <p class="eyebrow">SRI EXPLORE</p>
+        <h2>Admin sign in</h2>
+        <p class="muted">Manage travel enquiries and newsletter subscribers.</p>
+        <form id="loginForm">
+          <label for="username">Username</label>
+          <input id="username" name="username" autocomplete="username" required>
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" required>
+          <button type="submit">Sign in</button>
+          <p class="form-message" id="loginMessage" role="alert"></p>
+        </form>
+      </section>
+
+      <section class="dashboard" id="dashboard" hidden>
+        <header class="dashboard-header">
+          <div>
+            <p class="eyebrow">SRI EXPLORE</p>
+            <h2>Submissions</h2>
+          </div>
+          <button class="secondary" id="logoutButton" type="button">Log out</button>
+        </header>
+        <div class="summary" id="summary"></div>
+        <p class="form-message" id="dashboardMessage" role="alert"></p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Destination</th>
+                <th>Message</th>
+                <th>Received</th>
+              </tr>
+            </thead>
+            <tbody id="submissionsBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </section>
   <!-- ============================ FOOTER ============================ -->
   <footer class="footer">
     <div class="container">
@@ -732,6 +779,7 @@
   <button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
   <!-- Main JavaScript -->
   <script src="script.js"></script>
+  <script src="admin.js"></script>
 </body>
 </html>
 Filter files…

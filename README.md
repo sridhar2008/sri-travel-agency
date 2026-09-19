@@ -10,7 +10,7 @@ npm start
 
 Open `http://localhost:3000` in a browser. The server serves the website and saves newsletter subscriptions and contact enquiries to `data/submissions.json`.
 
-Open `http://localhost:3000/admin.html` to view all submissions. Admin login: username `sriagency`, password `asdfghjkl`.
+Open `http://localhost:3000/#admin` to sign in and view all submissions on the same page. Admin login: username `sriagency`, password `asdfghjkl`.
 
 ### API
 
