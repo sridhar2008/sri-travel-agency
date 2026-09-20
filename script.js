@@ -85,7 +85,7 @@ const packageCatalog = [
   ['gujarat-culture', 'Gujarat Culture Circuit', 'Ahmedabad, Rann of Kutch & Dwarka', '6 Nights / 7 Days', '₹27,999', '4.8', ['Hotel', 'Rann Visit', 'Temple Tour', 'Breakfast'], ''],
   ['uttar-pradesh-spiritual', 'Uttar Pradesh Spiritual Trail', 'Agra, Lucknow & Varanasi', '5 Nights / 6 Days', '₹21,999', '4.9', ['Hotel', 'Taj Mahal', 'Ganga Aarti', 'Guide'], 'Best Seller'],
   ['central-india-wildlife', 'Central India Nature Tour', 'Bhopal, Pachmarhi & Khajuraho', '5 Nights / 6 Days', '₹20,999', '4.7', ['Hotel', 'Forest Visit', 'Heritage Tour', 'Car'], '']
-].map(([id, name, destination, duration, price, rating, includes, badge], index) => ({ id, name, destination, duration, price, rating, includes, badge, image: imageSet[index % imageSet.length], description: `A carefully planned ${name.toLowerCase()} covering ${destination} with local experiences and comfortable travel.` }));
+].map(([id, name, destination, duration, price, rating, includes, badge], index) => ({ id, name, destination, duration, price, basePrice: Number(price.replace(/[^0-9]/g, '')), rating, includes, badge, image: imageSet[index % imageSet.length], description: `A carefully planned ${name.toLowerCase()} covering ${destination} with local experiences and comfortable travel.` }));
 
 const renderTravelCatalog = () => {
   const destinationGrid = document.querySelector('.dest-grid');
@@ -118,6 +118,8 @@ const populateDestinationOptions = () => {
     select.innerHTML = '<option value="">Select destination</option>';
     indiaSpots.forEach((spot) => select.add(new Option(`${spot.name}, ${spot.state}`, spot.name)));
   });
+  const packageSelect = document.getElementById('contactPackage');
+  if (packageSelect) packageCatalog.forEach((item) => packageSelect.add(new Option(`${item.name} - ${item.price} per person`, item.id)));
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -182,6 +184,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const contactTransport = document.getElementById('contactTransport');
     if (contactTransport) contactTransport.value = event.target.value;
   });
+  const transportRates = {
+    'Sri Kumaran Travels - Tourist Bus': 1800,
+    'SMT Travels - Tourist Bus': 1800,
+    Train: 2500,
+    'IndiGo - Flight': 6500,
+    'Air India - Flight': 7000,
+    'Akasa Air - Flight': 6000,
+    'Tempo Traveller': 3000
+  };
+  const updateBookingTotal = () => {
+    const packageItem = packageCatalog.find((item) => item.id === document.getElementById('contactPackage')?.value);
+    const transport = document.getElementById('contactTransport')?.value;
+    const travelers = Math.min(20, Math.max(1, Number(document.getElementById('contactTravelers')?.value) || 1));
+    const totalElement = document.getElementById('bookingTotal');
+    if (!totalElement) return;
+    if (!packageItem || !transportRates[transport]) {
+      totalElement.textContent = 'Choose a package and transport to see your estimated total.';
+      return;
+    }
+    const total = (packageItem.basePrice + transportRates[transport]) * travelers;
+    totalElement.textContent = `Estimated total for ${travelers} traveler${travelers === 1 ? '' : 's'}: ₹${total.toLocaleString('en-IN')}`;
+  };
+  ['contactPackage', 'contactTransport', 'contactTravelers'].forEach((id) => document.getElementById(id)?.addEventListener('input', updateBookingTotal));
+  document.querySelectorAll('.package-actions a[href="#contact"]').forEach((button) => button.addEventListener('click', () => {
+    const packageCard = button.closest('.package-card');
+    const packageSelect = document.getElementById('contactPackage');
+    if (packageCard && packageSelect) packageSelect.value = packageCard.dataset.package;
+    updateBookingTotal();
+  }));
   document.getElementById('newsletterForm')?.addEventListener('submit', async (event) => {
     event.preventDefault();
     const email = document.getElementById('newsletterEmail').value.trim();
@@ -196,7 +227,10 @@ document.addEventListener('DOMContentLoaded', () => {
       email: document.getElementById('contactEmail').value,
       phone: document.getElementById('contactPhone').value,
       destination: document.getElementById('contactDestination').value,
+      packageId: document.getElementById('contactPackage').value,
+      travelers: Number(document.getElementById('contactTravelers').value),
       transport: document.getElementById('contactTransport').value,
+      estimatedPrice: document.getElementById('bookingTotal').textContent,
       message: document.getElementById('contactMessage').value
     };
     await submitToFirebase(payload, 'contactMessageResult', 'Thank you. Our travel team will contact you soon.');

@@ -25,5 +25,5 @@ Keep `data/` private. The server blocks direct access to that directory, and it 
 ### API
 
 - `POST /api/newsletter` with `{ "email": "traveler@example.com" }`
-- `POST /api/contact` with `{ "name": "...", "email": "...", "phone": "...", "destination": "...", "transport": "...", "message": "..." }`
+- `POST /api/contact` with `{ "name": "...", "email": "...", "phone": "...", "destination": "...", "packageId": "...", "travelers": 2, "transport": "...", "estimatedPrice": "...", "message": "..." }`
 - `DELETE /api/admin/submissions/:id` with an admin bearer token to delete a submission

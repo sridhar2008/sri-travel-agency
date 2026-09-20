@@ -21,7 +21,6 @@
         <li><a href="#home" class="nav-link active">Home</a></li>
         <li><a href="#destinations" class="nav-link">Destinations</a></li>
         <li><a href="#packages" class="nav-link">Packages</a></li>
-        <li><a href="#transport" class="nav-link">Transport</a></li>
         <li><a href="#experiences" class="nav-link">Experiences</a></li>
         <li><a href="#about" class="nav-link">About Us</a></li>
         <li><a href="#contact" class="nav-link">Contact</a></li>
@@ -666,6 +665,18 @@
         <form class="contact-form reveal" id="contactForm" novalidate>
           <div class="contact-row">
             <div class="form-group">
+              <label for="contactPackage">Package</label>
+              <select id="contactPackage" required>
+                <option value="">Select package</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="contactTravelers">Travelers</label>
+              <input type="number" id="contactTravelers" min="1" max="20" value="2" required>
+            </div>
+          </div>
+          <div class="contact-row">
+            <div class="form-group">
               <label for="contactName">Name</label>
               <input type="text" id="contactName" placeholder="Your name">
             </div>
@@ -699,7 +710,7 @@
           </div>
           <div class="form-group">
             <label for="contactTransport">Preferred transport</label>
-            <select id="contactTransport">
+            <select id="contactTransport" required>
               <option value="">Select transport</option>
               <option>Sri Kumaran Travels - Tourist Bus</option>
               <option>SMT Travels - Tourist Bus</option>
@@ -710,6 +721,7 @@
               <option>Tempo Traveller</option>
             </select>
           </div>
+          <div class="booking-total" id="bookingTotal" aria-live="polite">Choose a package and transport to see your estimated total.</div>
           <div class="form-group">
             <label for="contactMessage">Message</label>
             <textarea id="contactMessage" rows="4" placeholder="Tell us about your trip"></textarea>
@@ -759,7 +771,10 @@
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Destination</th>
+                <th>Package</th>
+                <th>Travelers</th>
                 <th>Transport</th>
+                <th>Estimate</th>
                 <th>Message</th>
                 <th>Received</th>
                 <th>Actions</th>
@@ -791,7 +806,6 @@
             <li><a href="#home">Home</a></li>
             <li><a href="#destinations">Destinations</a></li>
             <li><a href="#packages">Packages</a></li>
-            <li><a href="#transport">Transport</a></li>
             <li><a href="#experiences">Experiences</a></li>
             <li><a href="#about">About</a></li>
             <li><a href="#contact">Contact</a></li>

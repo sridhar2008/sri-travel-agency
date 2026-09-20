@@ -68,7 +68,10 @@ const initializeDatabase = async () => {
       name TEXT,
       phone TEXT,
       destination TEXT,
+      package_id TEXT,
+      travelers INTEGER,
       transport TEXT,
+      estimated_price TEXT,
       message TEXT
     );
     CREATE TABLE IF NOT EXISTS migrations (
@@ -80,6 +83,13 @@ const initializeDatabase = async () => {
     database.exec('ALTER TABLE submissions ADD COLUMN transport TEXT');
   } catch (error) {
     if (!error.message.includes('duplicate column name')) throw error;
+  }
+  for (const column of ['package_id TEXT', 'travelers INTEGER', 'estimated_price TEXT']) {
+    try {
+      database.exec(`ALTER TABLE submissions ADD COLUMN ${column}`);
+    } catch (error) {
+      if (!error.message.includes('duplicate column name')) throw error;
+    }
   }
 
   const migration = database.prepare('SELECT name FROM migrations WHERE name = ?').get('json-submissions');
@@ -96,8 +106,8 @@ const initializeDatabase = async () => {
   database.exec('BEGIN');
   try {
     const insert = database.prepare(`
-      INSERT INTO submissions (id, type, created_at, email, name, phone, destination, transport, message)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO submissions (id, type, created_at, email, name, phone, destination, package_id, travelers, transport, estimated_price, message)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     for (const submission of submissions) {
       insert.run(
@@ -108,7 +118,10 @@ const initializeDatabase = async () => {
         submission.name ?? null,
         submission.phone ?? null,
         submission.destination ?? null,
+        submission.packageId ?? null,
+        submission.travelers ?? null,
         submission.transport ?? null,
+        submission.estimatedPrice ?? null,
         submission.message ?? null
       );
     }
@@ -122,8 +135,8 @@ const initializeDatabase = async () => {
 
 const saveSubmission = (submission) => {
   database.prepare(`
-    INSERT INTO submissions (id, type, created_at, email, name, phone, destination, transport, message)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO submissions (id, type, created_at, email, name, phone, destination, package_id, travelers, transport, estimated_price, message)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     submission.id,
     submission.type,
@@ -132,13 +145,16 @@ const saveSubmission = (submission) => {
     submission.name ?? null,
     submission.phone ?? null,
     submission.destination ?? null,
+    submission.packageId ?? null,
+    submission.travelers ?? null,
     submission.transport ?? null,
+    submission.estimatedPrice ?? null,
     submission.message ?? null
   );
 };
 
 const readSubmissions = () => database.prepare(`
-  SELECT id, type, created_at, email, name, phone, destination, transport, message
+  SELECT id, type, created_at, email, name, phone, destination, package_id, travelers, transport, estimated_price, message
   FROM submissions
   ORDER BY rowid ASC
 `).all().map((submission) => {
@@ -152,7 +168,10 @@ const readSubmissions = () => database.prepare(`
     result.name = submission.name || '';
     result.phone = submission.phone || '';
     result.destination = submission.destination || '';
+    result.packageId = submission.package_id || '';
+    result.travelers = submission.travelers || 0;
     result.transport = submission.transport || '';
+    result.estimatedPrice = submission.estimated_price || '';
     result.message = submission.message || '';
   }
   return result;
@@ -240,13 +259,19 @@ const handleSubmission = async (request, response, type) => {
     submission.name = clean(payload.name);
     submission.phone = clean(payload.phone);
     submission.destination = clean(payload.destination);
+    submission.packageId = clean(payload.packageId);
+    submission.travelers = Number.isInteger(payload.travelers) ? payload.travelers : 0;
     submission.transport = clean(payload.transport);
+    submission.estimatedPrice = clean(payload.estimatedPrice);
     submission.message = clean(payload.message);
     if (!submission.name || !submission.message
       || !isValidLength(submission.name, 120)
       || !isValidLength(submission.phone, 40)
       || !isValidLength(submission.destination, 80)
-      || !isValidLength(submission.transport, 40)
+      || submission.travelers < 1 || submission.travelers > 20
+      || !isValidLength(submission.packageId, 80)
+      || !isValidLength(submission.transport, 80)
+      || !isValidLength(submission.estimatedPrice, 120)
       || !isValidLength(submission.message, 2000)) {
       return sendJson(response, 400, { error: 'Name and message are required.' });
     }
