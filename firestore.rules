@@ -4,7 +4,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
     match /submissions/{submissionId} {
       allow create: if request.resource.data.keys().hasOnly([
-          'type', 'email', 'createdAt', 'name', 'phone', 'state', 'destination', 'packageId', 'travelers', 'stayDays', 'transport', 'estimatedPrice', 'suggestion'
+          'type', 'email', 'createdAt', 'name', 'phone', 'state', 'destination', 'packageId', 'travelers', 'stayDays', 'hotelPlan', 'transport', 'estimatedPrice', 'suggestion'
         ])
         && request.resource.data.type in ['contact', 'newsletter']
         && request.resource.data.email is string
@@ -28,6 +28,7 @@ service cloud.firestore {
             && request.resource.data.stayDays is int
             && request.resource.data.stayDays >= 1
             && request.resource.data.stayDays <= 30
+            && request.resource.data.hotelPlan in ['budget', 'standard', 'premium']
             && request.resource.data.transport is string
             && request.resource.data.transport.size() > 0
             && request.resource.data.estimatedPrice is string

@@ -34,12 +34,13 @@ const renderSubmissions = (submissions) => {
       <td>${escapeHtml(submission.packageId || '-')}</td>
       <td>${escapeHtml(submission.travelers || '-')}</td>
       <td>${escapeHtml(submission.stayDays || '-')}</td>
+      <td>${escapeHtml(submission.hotelPlan || '-')}</td>
       <td>${escapeHtml(submission.transport || '-')}</td>
       <td>${escapeHtml(submission.estimatedPrice || '-')}</td>
       <td>${escapeHtml(submission.suggestion || '-')}</td>
       <td>${escapeHtml(submission.createdAt?.toDate().toLocaleString() || '-')}</td>
       <td><button class="delete-submission" type="button" data-id="${escapeAttribute(submission.id)}">Delete</button></td>
-    </tr>`).join('') : '<tr><td class="empty" colspan="14">No submissions yet.</td></tr>';
+    </tr>`).join('') : '<tr><td class="empty" colspan="15">No submissions yet.</td></tr>';
 };
 
 const loadDashboard = async () => {

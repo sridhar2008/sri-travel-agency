@@ -62,7 +62,10 @@ const indiaSpots = [
   ['Udaipur', 'Rajasthan', 'Lakes, palaces and romantic old-city views'],
   ['Varanasi', 'Uttar Pradesh', 'Ghats, Ganga aarti and spiritual traditions'],
   ['Wayanad', 'Kerala', 'Rainforests, waterfalls and tribal heritage']
-].map(([name, state, summary], index) => ({ name, state, summary, image: imageSet[index % imageSet.length], price: `₹${(8999 + (index % 8) * 2000).toLocaleString('en-IN')}` }));
+].map(([name, state, summary], index) => {
+  const baseCost = 8999 + (index % 8) * 2000;
+  return { name, state, summary, image: imageSet[index % imageSet.length], baseCost, price: `₹${baseCost.toLocaleString('en-IN')}` };
+});
 
 const packageCatalog = [
   ['rajasthan-royal', 'Rajasthan Royal Circuit', 'Jaipur, Jodhpur & Udaipur', '6 Nights / 7 Days', '₹28,999', '4.9', ['Hotel', 'Fort Tours', 'Desert Camp', 'Breakfast'], 'Best Seller'],
@@ -205,6 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
     Traveller: 7500,
     Airline: 7000
   };
+  const hotelRates = { budget: 900, standard: 1600, premium: 2800 };
   const packageSelect = document.getElementById('contactPackage');
   const travelersInput = document.getElementById('contactTravelers');
   const stayDaysInput = document.getElementById('contactStayDays');
@@ -236,15 +240,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const transport = document.getElementById('contactTransport')?.value;
     const travelers = Math.min(20, Math.max(1, Number(document.getElementById('contactTravelers')?.value) || 1));
     const stayDays = Math.min(30, Math.max(1, Number(stayDaysInput?.value) || 1));
+    const hotelPlan = document.getElementById('contactHotelPlan')?.value || 'standard';
+    const spot = indiaSpots.find((item) => item.name === destinationSelect?.value);
     const totalElement = document.getElementById('bookingTotal');
     if (!totalElement) return;
-    if (!packageItem || !transportRates[transport]) {
-      totalElement.textContent = 'Choose a package and transport to see your estimated total.';
+    if (!packageItem || !spot || !transportRates[transport]) {
+      totalElement.textContent = 'Choose a place, package, hotel plan, and transport to see your estimated total.';
       return;
     }
     const includedDays = Number(packageItem.duration.match(/\d+ Days/)?.[0].split(' ')[0]) || 1;
-    const total = Math.round((packageItem.basePrice + transportRates[transport]) * travelers * (stayDays / includedDays));
-    totalElement.textContent = `Estimated total for ${travelers} traveler${travelers === 1 ? '' : 's'} and ${stayDays} day${stayDays === 1 ? '' : 's'}: ₹${total.toLocaleString('en-IN')}`;
+    const packagePerPerson = packageItem.basePrice * (stayDays / includedDays);
+    const hotelPerPerson = (hotelRates[hotelPlan] * stayDays) / 2;
+    const placeAdjustment = Math.max(0, spot.baseCost - 8999);
+    const operatingCost = packagePerPerson + placeAdjustment + hotelPerPerson + transportRates[transport];
+    const total = Math.round(operatingCost * travelers * 1.1);
+    totalElement.textContent = `Estimated total for ${travelers} traveler${travelers === 1 ? '' : 's'} and ${stayDays} day${stayDays === 1 ? '' : 's'}: ₹${total.toLocaleString('en-IN')} (includes 10% service margin)`;
   };
   const updateSuggestion = () => {
     const packageItem = packageCatalog.find((item) => item.id === packageSelect?.value);
@@ -252,15 +262,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const travelers = Math.min(20, Math.max(1, Number(travelersInput?.value) || 1));
     const stayDays = Math.min(30, Math.max(1, Number(stayDaysInput?.value) || 1));
     const transport = document.getElementById('contactTransport')?.value;
+    const hotelPlan = document.getElementById('contactHotelPlan')?.selectedOptions[0]?.textContent || 'Standard hotel';
     const suggestion = document.getElementById('bookingSuggestion');
     if (!suggestion) return;
     if (!packageItem || !spot) {
       suggestion.textContent = 'Choose a package, state, and tourist spot to get a travel suggestion.';
       return;
     }
-    suggestion.innerHTML = `<strong>Suggested plan:</strong> ${stayDays} days in ${spot.name}, ${spot.state}, using ${transport || 'the best available transport'} for ${travelers} traveler${travelers === 1 ? '' : 's'}. ${packageItem.name} includes ${packageItem.includes.slice(0, 2).join(' and ')}.`;
+    suggestion.innerHTML = `<strong>Suggested plan:</strong> ${stayDays} days in ${spot.name}, ${spot.state}, with a ${hotelPlan.toLowerCase()} and ${transport || 'the best available transport'} for ${travelers} traveler${travelers === 1 ? '' : 's'}. ${packageItem.name} includes ${packageItem.includes.slice(0, 2).join(' and ')}.`;
   };
-  [packageSelect, document.getElementById('contactTransport'), travelersInput, stayDaysInput, destinationSelect].forEach((element) => element?.addEventListener('input', () => { updateDetails(); updateBookingTotal(); updateSuggestion(); }));
+  [packageSelect, document.getElementById('contactTransport'), document.getElementById('contactHotelPlan'), travelersInput, stayDaysInput, destinationSelect].forEach((element) => element?.addEventListener('input', () => { updateDetails(); updateBookingTotal(); updateSuggestion(); }));
   travelersInput?.addEventListener('input', () => { suggestTransport(); updateBookingTotal(); updateSuggestion(); });
   suggestTransport();
   updateDetails();
@@ -289,6 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
       packageId: document.getElementById('contactPackage').value,
       travelers: Number(document.getElementById('contactTravelers').value),
       stayDays: Number(document.getElementById('contactStayDays').value),
+      hotelPlan: document.getElementById('contactHotelPlan').value,
       transport: document.getElementById('contactTransport').value,
       estimatedPrice: document.getElementById('bookingTotal').textContent,
       suggestion: document.getElementById('bookingSuggestion').textContent

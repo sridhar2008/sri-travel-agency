@@ -93,6 +93,9 @@ input:focus, select:focus, textarea:focus { border-color: var(--blue); }
 .booking-details, .booking-suggestion { margin: 4px 0 14px; padding: 14px; border: 1px solid var(--line); color: var(--muted); background: var(--soft); font-size: .85rem; }
 .booking-details strong, .booking-suggestion strong { color: var(--navy); }
 .booking-suggestion { border-left: 4px solid var(--blue); color: var(--ink); background: #eef7fc; }
+.pricing-note, .pricing-sources { color: var(--muted); font-size: .75rem; }
+.pricing-note { margin: 0 0 6px; }
+.pricing-sources a { color: var(--blue); text-decoration: underline; }
 .admin-shell { width: min(1320px, calc(100% - 40px)); margin: auto; }
 .login-panel { width: min(440px, 100%); margin: 0 auto; padding: 38px; border-radius: 8px; background: var(--paper); box-shadow: var(--shadow); }
 .login-panel h2, .dashboard h2 { margin: 0 0 8px; color: var(--navy); }

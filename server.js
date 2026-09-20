@@ -72,6 +72,7 @@ const initializeDatabase = async () => {
       package_id TEXT,
       travelers INTEGER,
       stay_days INTEGER,
+      hotel_plan TEXT,
       transport TEXT,
       estimated_price TEXT,
       message TEXT,
@@ -99,7 +100,7 @@ const initializeDatabase = async () => {
   } catch (error) {
     if (!error.message.includes('duplicate column name')) throw error;
   }
-  for (const column of ['stay_days INTEGER', 'suggestion TEXT']) {
+  for (const column of ['stay_days INTEGER', 'hotel_plan TEXT', 'suggestion TEXT']) {
     try {
       database.exec(`ALTER TABLE submissions ADD COLUMN ${column}`);
     } catch (error) {
@@ -121,8 +122,8 @@ const initializeDatabase = async () => {
   database.exec('BEGIN');
   try {
     const insert = database.prepare(`
-      INSERT INTO submissions (id, type, created_at, email, name, phone, state, destination, package_id, travelers, stay_days, transport, estimated_price, message, suggestion)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO submissions (id, type, created_at, email, name, phone, state, destination, package_id, travelers, stay_days, hotel_plan, transport, estimated_price, message, suggestion)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     for (const submission of submissions) {
       insert.run(
@@ -137,6 +138,7 @@ const initializeDatabase = async () => {
         submission.packageId ?? null,
         submission.travelers ?? null,
         submission.stayDays ?? null,
+        submission.hotelPlan ?? null,
         submission.transport ?? null,
         submission.estimatedPrice ?? null,
         submission.message ?? null,
@@ -153,8 +155,8 @@ const initializeDatabase = async () => {
 
 const saveSubmission = (submission) => {
   database.prepare(`
-    INSERT INTO submissions (id, type, created_at, email, name, phone, state, destination, package_id, travelers, stay_days, transport, estimated_price, message, suggestion)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO submissions (id, type, created_at, email, name, phone, state, destination, package_id, travelers, stay_days, hotel_plan, transport, estimated_price, message, suggestion)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     submission.id,
     submission.type,
@@ -167,6 +169,7 @@ const saveSubmission = (submission) => {
     submission.packageId ?? null,
     submission.travelers ?? null,
     submission.stayDays ?? null,
+    submission.hotelPlan ?? null,
     submission.transport ?? null,
     submission.estimatedPrice ?? null,
     submission.message ?? null,
@@ -175,7 +178,7 @@ const saveSubmission = (submission) => {
 };
 
 const readSubmissions = () => database.prepare(`
-  SELECT id, type, created_at, email, name, phone, state, destination, package_id, travelers, stay_days, transport, estimated_price, suggestion
+  SELECT id, type, created_at, email, name, phone, state, destination, package_id, travelers, stay_days, hotel_plan, transport, estimated_price, suggestion
   FROM submissions
   ORDER BY rowid ASC
 `).all().map((submission) => {
@@ -193,6 +196,7 @@ const readSubmissions = () => database.prepare(`
     result.packageId = submission.package_id || '';
     result.travelers = submission.travelers || 0;
     result.stayDays = submission.stay_days || 0;
+    result.hotelPlan = submission.hotel_plan || '';
     result.transport = submission.transport || '';
     result.estimatedPrice = submission.estimated_price || '';
     result.suggestion = submission.suggestion || '';
@@ -286,6 +290,7 @@ const handleSubmission = async (request, response, type) => {
     submission.packageId = clean(payload.packageId);
     submission.travelers = Number.isInteger(payload.travelers) ? payload.travelers : 0;
     submission.stayDays = Number.isInteger(payload.stayDays) ? payload.stayDays : 0;
+    submission.hotelPlan = clean(payload.hotelPlan);
     submission.transport = clean(payload.transport);
     submission.estimatedPrice = clean(payload.estimatedPrice);
     submission.suggestion = clean(payload.suggestion);
@@ -296,6 +301,7 @@ const handleSubmission = async (request, response, type) => {
       || !isValidLength(submission.destination, 80)
       || submission.travelers < 1 || submission.travelers > 20
       || submission.stayDays < 1 || submission.stayDays > 30
+      || !['budget', 'standard', 'premium'].includes(submission.hotelPlan)
       || !isValidLength(submission.packageId, 80)
       || !isValidLength(submission.transport, 80)
       || !isValidLength(submission.estimatedPrice, 120)

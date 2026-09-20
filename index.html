@@ -652,6 +652,14 @@
               <label for="contactStayDays">Days to stay</label>
               <input type="number" id="contactStayDays" min="1" max="30" value="3" required>
             </div>
+            <div class="form-group">
+              <label for="contactHotelPlan">Stay type</label>
+              <select id="contactHotelPlan" required>
+                <option value="budget">Budget hotel</option>
+                <option value="standard" selected>Standard hotel</option>
+                <option value="premium">Premium hotel</option>
+              </select>
+            </div>
           </div>
           <div class="booking-details" id="packageDetails" aria-live="polite">Select a package to see package details.</div>
           <div class="contact-row">
@@ -698,8 +706,10 @@
             </div>
           </div>
           <div class="booking-details" id="spotDetails" aria-live="polite">Select a state and tourist spot to see destination details.</div>
-          <div class="booking-total" id="bookingTotal" aria-live="polite">Choose a package and transport to see your estimated total.</div>
+          <div class="booking-total" id="bookingTotal" aria-live="polite">Choose a place, package, hotel plan, and transport to see your estimated total.</div>
           <div class="booking-suggestion" id="bookingSuggestion" aria-live="polite">Your travel suggestion will appear here after you choose your trip details.</div>
+          <p class="pricing-note">Estimate includes selected place, package activities, hotel benchmark, transport, and a 10% service margin. Final prices depend on dates and availability.</p>
+          <p class="pricing-sources">Benchmarks: <a href="https://www.goibibo.com/hotels/" target="_blank" rel="noopener">Goibibo hotels</a> · <a href="https://www.redbus.in/" target="_blank" rel="noopener">redBus buses</a> · <a href="https://www.irctc.co.in/nget/train-search" target="_blank" rel="noopener">IRCTC trains</a> · <a href="https://www.makemytrip.com/hotels/" target="_blank" rel="noopener">MakeMyTrip hotels</a></p>
           <button type="submit" class="btn btn-primary contact-submit">Send Enquiry</button>
           <p class="contact-message" id="contactMessageResult"></p>
         </form>
@@ -749,6 +759,7 @@
                 <th>Package</th>
                 <th>Travelers</th>
                 <th>Days</th>
+                <th>Hotel</th>
                 <th>Transport</th>
                 <th>Estimate</th>
                 <th>Suggestion</th>
