@@ -67,7 +67,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--blue); }
 .transport-section { background: #fff8e8; }
 .transport-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
 .transport-card { overflow: hidden; border: 1px solid #ead9ad; background: #fff; box-shadow: 0 8px 20px rgba(16,42,67,.06); }
-.transport-image { display: block; width: 100%; height: 145px; object-fit: cover; }
+.transport-image { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
 .transport-type { display: inline-block; margin: 14px 16px 0; color: #a16d00; font-size: .7rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
 .transport-card h3, .transport-card p { margin-right: 16px; margin-left: 16px; }
 .transport-card h3 { margin-top: 5px; margin-bottom: 6px; font-size: 1rem; }
