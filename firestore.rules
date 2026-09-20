@@ -4,7 +4,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
     match /submissions/{submissionId} {
       allow create: if request.resource.data.keys().hasOnly([
-          'type', 'email', 'createdAt', 'name', 'phone', 'state', 'destination', 'packageId', 'travelers', 'stayDays', 'hotelPlan', 'transport', 'estimatedPrice', 'suggestion'
+          'type', 'email', 'createdAt', 'name', 'phone', 'state', 'destination', 'packageId', 'travelers', 'stayDays', 'hotelPlan', 'transport', 'estimatedPrice', 'suggestion', 'tripPlan'
         ])
         && request.resource.data.type in ['contact', 'newsletter']
         && request.resource.data.email is string
@@ -34,7 +34,8 @@ service cloud.firestore {
             && request.resource.data.estimatedPrice is string
             && request.resource.data.suggestion is string
             && request.resource.data.suggestion.size() > 0
-            && request.resource.data.suggestion.size() <= 2000));
+            && request.resource.data.suggestion.size() <= 2000
+            && request.resource.data.tripPlan is map));
       allow read, update, delete: if request.auth != null
         && request.auth.token.admin == true;
     }

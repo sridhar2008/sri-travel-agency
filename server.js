@@ -76,7 +76,8 @@ const initializeDatabase = async () => {
       transport TEXT,
       estimated_price TEXT,
       message TEXT,
-      suggestion TEXT
+      suggestion TEXT,
+      trip_plan TEXT
     );
     CREATE TABLE IF NOT EXISTS migrations (
       name TEXT PRIMARY KEY,
@@ -100,7 +101,7 @@ const initializeDatabase = async () => {
   } catch (error) {
     if (!error.message.includes('duplicate column name')) throw error;
   }
-  for (const column of ['stay_days INTEGER', 'hotel_plan TEXT', 'suggestion TEXT']) {
+  for (const column of ['stay_days INTEGER', 'hotel_plan TEXT', 'suggestion TEXT', 'trip_plan TEXT']) {
     try {
       database.exec(`ALTER TABLE submissions ADD COLUMN ${column}`);
     } catch (error) {
@@ -122,8 +123,8 @@ const initializeDatabase = async () => {
   database.exec('BEGIN');
   try {
     const insert = database.prepare(`
-      INSERT INTO submissions (id, type, created_at, email, name, phone, state, destination, package_id, travelers, stay_days, hotel_plan, transport, estimated_price, message, suggestion)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO submissions (id, type, created_at, email, name, phone, state, destination, package_id, travelers, stay_days, hotel_plan, transport, estimated_price, message, suggestion, trip_plan)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     for (const submission of submissions) {
       insert.run(
@@ -142,7 +143,8 @@ const initializeDatabase = async () => {
         submission.transport ?? null,
         submission.estimatedPrice ?? null,
         submission.message ?? null,
-        submission.suggestion ?? null
+        submission.suggestion ?? null,
+        submission.tripPlan ? JSON.stringify(submission.tripPlan) : null
       );
     }
     database.prepare('INSERT INTO migrations (name, completed_at) VALUES (?, ?)').run('json-submissions', new Date().toISOString());
@@ -155,8 +157,8 @@ const initializeDatabase = async () => {
 
 const saveSubmission = (submission) => {
   database.prepare(`
-    INSERT INTO submissions (id, type, created_at, email, name, phone, state, destination, package_id, travelers, stay_days, hotel_plan, transport, estimated_price, message, suggestion)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO submissions (id, type, created_at, email, name, phone, state, destination, package_id, travelers, stay_days, hotel_plan, transport, estimated_price, message, suggestion, trip_plan)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     submission.id,
     submission.type,
@@ -173,12 +175,13 @@ const saveSubmission = (submission) => {
     submission.transport ?? null,
     submission.estimatedPrice ?? null,
     submission.message ?? null,
-    submission.suggestion ?? null
+    submission.suggestion ?? null,
+    submission.tripPlan ? JSON.stringify(submission.tripPlan) : null
   );
 };
 
 const readSubmissions = () => database.prepare(`
-  SELECT id, type, created_at, email, name, phone, state, destination, package_id, travelers, stay_days, hotel_plan, transport, estimated_price, suggestion
+  SELECT id, type, created_at, email, name, phone, state, destination, package_id, travelers, stay_days, hotel_plan, transport, estimated_price, suggestion, trip_plan
   FROM submissions
   ORDER BY rowid ASC
 `).all().map((submission) => {
@@ -200,6 +203,7 @@ const readSubmissions = () => database.prepare(`
     result.transport = submission.transport || '';
     result.estimatedPrice = submission.estimated_price || '';
     result.suggestion = submission.suggestion || '';
+    result.tripPlan = submission.trip_plan ? JSON.parse(submission.trip_plan) : null;
   }
   return result;
 });
@@ -294,6 +298,7 @@ const handleSubmission = async (request, response, type) => {
     submission.transport = clean(payload.transport);
     submission.estimatedPrice = clean(payload.estimatedPrice);
     submission.suggestion = clean(payload.suggestion);
+    submission.tripPlan = payload.tripPlan && typeof payload.tripPlan === 'object' ? payload.tripPlan : null;
     if (!submission.name || !submission.state || !submission.destination || !submission.suggestion
       || !isValidLength(submission.name, 120)
       || !isValidLength(submission.state, 80)

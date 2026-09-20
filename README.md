@@ -1,4 +1,4 @@
-- `POST /api/contact` with `{ "name": "...", "email": "...", "phone": "...", "state": "...", "destination": "...", "packageId": "...", "travelers": 2, "stayDays": 3, "hotelPlan": "standard", "transport": "...", "estimatedPrice": "...", "suggestion": "..." }`
+- `POST /api/contact` with `{ "name": "...", "email": "...", "phone": "...", "state": "...", "destination": "...", "packageId": "...", "travelers": 2, "stayDays": 3, "hotelPlan": "standard", "transport": "...", "estimatedPrice": "...", "suggestion": "...", "tripPlan": { "enquiryId": "ENQ-2026-XXXXX" } }`
 # Sri Travel Agency
 
 ## Run locally
