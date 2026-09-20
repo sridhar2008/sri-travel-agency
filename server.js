@@ -71,9 +71,11 @@ const initializeDatabase = async () => {
       destination TEXT,
       package_id TEXT,
       travelers INTEGER,
+      stay_days INTEGER,
       transport TEXT,
       estimated_price TEXT,
-      message TEXT
+      message TEXT,
+      suggestion TEXT
     );
     CREATE TABLE IF NOT EXISTS migrations (
       name TEXT PRIMARY KEY,
@@ -97,6 +99,13 @@ const initializeDatabase = async () => {
   } catch (error) {
     if (!error.message.includes('duplicate column name')) throw error;
   }
+  for (const column of ['stay_days INTEGER', 'suggestion TEXT']) {
+    try {
+      database.exec(`ALTER TABLE submissions ADD COLUMN ${column}`);
+    } catch (error) {
+      if (!error.message.includes('duplicate column name')) throw error;
+    }
+  }
 
   const migration = database.prepare('SELECT name FROM migrations WHERE name = ?').get('json-submissions');
   if (migration) return;
@@ -112,8 +121,8 @@ const initializeDatabase = async () => {
   database.exec('BEGIN');
   try {
     const insert = database.prepare(`
-      INSERT INTO submissions (id, type, created_at, email, name, phone, state, destination, package_id, travelers, transport, estimated_price, message)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO submissions (id, type, created_at, email, name, phone, state, destination, package_id, travelers, stay_days, transport, estimated_price, message, suggestion)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     for (const submission of submissions) {
       insert.run(
@@ -127,9 +136,11 @@ const initializeDatabase = async () => {
         submission.destination ?? null,
         submission.packageId ?? null,
         submission.travelers ?? null,
+        submission.stayDays ?? null,
         submission.transport ?? null,
         submission.estimatedPrice ?? null,
-        submission.message ?? null
+        submission.message ?? null,
+        submission.suggestion ?? null
       );
     }
     database.prepare('INSERT INTO migrations (name, completed_at) VALUES (?, ?)').run('json-submissions', new Date().toISOString());
@@ -142,8 +153,8 @@ const initializeDatabase = async () => {
 
 const saveSubmission = (submission) => {
   database.prepare(`
-    INSERT INTO submissions (id, type, created_at, email, name, phone, state, destination, package_id, travelers, transport, estimated_price, message)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO submissions (id, type, created_at, email, name, phone, state, destination, package_id, travelers, stay_days, transport, estimated_price, message, suggestion)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     submission.id,
     submission.type,
@@ -155,14 +166,16 @@ const saveSubmission = (submission) => {
     submission.destination ?? null,
     submission.packageId ?? null,
     submission.travelers ?? null,
+    submission.stayDays ?? null,
     submission.transport ?? null,
     submission.estimatedPrice ?? null,
-    submission.message ?? null
+    submission.message ?? null,
+    submission.suggestion ?? null
   );
 };
 
 const readSubmissions = () => database.prepare(`
-  SELECT id, type, created_at, email, name, phone, state, destination, package_id, travelers, transport, estimated_price, message
+  SELECT id, type, created_at, email, name, phone, state, destination, package_id, travelers, stay_days, transport, estimated_price, suggestion
   FROM submissions
   ORDER BY rowid ASC
 `).all().map((submission) => {
@@ -179,9 +192,10 @@ const readSubmissions = () => database.prepare(`
     result.destination = submission.destination || '';
     result.packageId = submission.package_id || '';
     result.travelers = submission.travelers || 0;
+    result.stayDays = submission.stay_days || 0;
     result.transport = submission.transport || '';
     result.estimatedPrice = submission.estimated_price || '';
-    result.message = submission.message || '';
+    result.suggestion = submission.suggestion || '';
   }
   return result;
 });
@@ -271,20 +285,22 @@ const handleSubmission = async (request, response, type) => {
     submission.destination = clean(payload.destination);
     submission.packageId = clean(payload.packageId);
     submission.travelers = Number.isInteger(payload.travelers) ? payload.travelers : 0;
+    submission.stayDays = Number.isInteger(payload.stayDays) ? payload.stayDays : 0;
     submission.transport = clean(payload.transport);
     submission.estimatedPrice = clean(payload.estimatedPrice);
-    submission.message = clean(payload.message);
-    if (!submission.name || !submission.state || !submission.destination || !submission.message
+    submission.suggestion = clean(payload.suggestion);
+    if (!submission.name || !submission.state || !submission.destination || !submission.suggestion
       || !isValidLength(submission.name, 120)
       || !isValidLength(submission.state, 80)
       || !isValidLength(submission.phone, 40)
       || !isValidLength(submission.destination, 80)
       || submission.travelers < 1 || submission.travelers > 20
+      || submission.stayDays < 1 || submission.stayDays > 30
       || !isValidLength(submission.packageId, 80)
       || !isValidLength(submission.transport, 80)
       || !isValidLength(submission.estimatedPrice, 120)
-      || !isValidLength(submission.message, 2000)) {
-      return sendJson(response, 400, { error: 'Name and message are required.' });
+      || !isValidLength(submission.suggestion, 2000)) {
+      return sendJson(response, 400, { error: 'Name, state, tourist spot, package, stay days, transport, and suggestion are required.' });
     }
   }
 

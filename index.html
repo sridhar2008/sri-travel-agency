@@ -632,7 +632,7 @@
             <span class="contact-icon">✉️</span>
             <div>
               <h4>Email</h4>
-              <p><a href="mailto:travelwith@sriexplore.com">travelwith@sriexplore.com</a></p>
+              <p><a href="mailto:sritravelagency@gmail.com">sritravelagency@gmail.com</a></p>
             </div>
           </div>
         </div>
@@ -648,7 +648,12 @@
               <label for="contactTravelers">Travelers</label>
               <input type="number" id="contactTravelers" min="1" max="20" value="2" required>
             </div>
+            <div class="form-group">
+              <label for="contactStayDays">Days to stay</label>
+              <input type="number" id="contactStayDays" min="1" max="30" value="3" required>
+            </div>
           </div>
+          <div class="booking-details" id="packageDetails" aria-live="polite">Select a package to see package details.</div>
           <div class="contact-row">
             <div class="form-group">
               <label for="contactName">Name</label>
@@ -674,7 +679,7 @@
           <div class="contact-row">
             <div class="form-group">
               <label for="contactDestination">Tourist spot</label>
-              <select id="contactDestination">
+              <select id="contactDestination" required>
                 <option value="">Select a state first</option>
               </select>
             </div>
@@ -692,11 +697,9 @@
               </select>
             </div>
           </div>
+          <div class="booking-details" id="spotDetails" aria-live="polite">Select a state and tourist spot to see destination details.</div>
           <div class="booking-total" id="bookingTotal" aria-live="polite">Choose a package and transport to see your estimated total.</div>
-          <div class="form-group">
-            <label for="contactMessage">Message</label>
-            <textarea id="contactMessage" rows="4" placeholder="Tell us about your trip"></textarea>
-          </div>
+          <div class="booking-suggestion" id="bookingSuggestion" aria-live="polite">Your travel suggestion will appear here after you choose your trip details.</div>
           <button type="submit" class="btn btn-primary contact-submit">Send Enquiry</button>
           <p class="contact-message" id="contactMessageResult"></p>
         </form>
@@ -745,9 +748,10 @@
                 <th>Destination</th>
                 <th>Package</th>
                 <th>Travelers</th>
+                <th>Days</th>
                 <th>Transport</th>
                 <th>Estimate</th>
-                <th>Message</th>
+                <th>Suggestion</th>
                 <th>Received</th>
                 <th>Actions</th>
               </tr>

@@ -126,6 +126,8 @@ const populateDestinationOptions = () => {
     if (!destinationSelect) return;
     destinationSelect.innerHTML = selectedState ? '<option value="">Select tourist spot</option>' : '<option value="">Select a state first</option>';
     indiaSpots.filter((spot) => spot.state === selectedState).forEach((spot) => destinationSelect.add(new Option(spot.name, spot.name)));
+    const spotDetails = document.getElementById('spotDetails');
+    if (spotDetails) spotDetails.textContent = selectedState ? 'Select a tourist spot to see destination details.' : 'Select a state and tourist spot to see destination details.';
   };
   stateSelect?.addEventListener('change', updateDestinations);
   const packageSelect = document.getElementById('contactPackage');
@@ -203,6 +205,26 @@ document.addEventListener('DOMContentLoaded', () => {
     Traveller: 7500,
     Airline: 7000
   };
+  const packageSelect = document.getElementById('contactPackage');
+  const travelersInput = document.getElementById('contactTravelers');
+  const stayDaysInput = document.getElementById('contactStayDays');
+  const destinationSelect = document.getElementById('contactDestination');
+  const updateDetails = () => {
+    const packageItem = packageCatalog.find((item) => item.id === packageSelect?.value);
+    const spot = indiaSpots.find((item) => item.name === destinationSelect?.value);
+    const packageDetailsElement = document.getElementById('packageDetails');
+    const spotDetailsElement = document.getElementById('spotDetails');
+    if (packageDetailsElement) {
+      packageDetailsElement.innerHTML = packageItem
+        ? `<strong>${packageItem.name}</strong><br>${packageItem.destination} · ${packageItem.duration}<br>${packageItem.includes.join(' · ')}`
+        : 'Select a package to see package details.';
+    }
+    if (spotDetailsElement) {
+      spotDetailsElement.innerHTML = spot
+        ? `<strong>${spot.name}, ${spot.state}</strong><br>${spot.summary}`
+        : 'Select a state and tourist spot to see destination details.';
+    }
+  };
   const suggestTransport = () => {
     const travelers = Math.min(20, Math.max(1, Number(document.getElementById('contactTravelers')?.value) || 1));
     const transport = travelers <= 4 ? 'Car-4' : travelers <= 7 ? 'Car-7' : travelers <= 12 ? 'Maxi Cab' : travelers <= 17 ? 'Traveller' : 'Tourist Bus';
@@ -213,19 +235,36 @@ document.addEventListener('DOMContentLoaded', () => {
     const packageItem = packageCatalog.find((item) => item.id === document.getElementById('contactPackage')?.value);
     const transport = document.getElementById('contactTransport')?.value;
     const travelers = Math.min(20, Math.max(1, Number(document.getElementById('contactTravelers')?.value) || 1));
+    const stayDays = Math.min(30, Math.max(1, Number(stayDaysInput?.value) || 1));
     const totalElement = document.getElementById('bookingTotal');
     if (!totalElement) return;
     if (!packageItem || !transportRates[transport]) {
       totalElement.textContent = 'Choose a package and transport to see your estimated total.';
       return;
     }
-    const total = (packageItem.basePrice + transportRates[transport]) * travelers;
-    totalElement.textContent = `Estimated total for ${travelers} traveler${travelers === 1 ? '' : 's'}: ₹${total.toLocaleString('en-IN')}`;
+    const includedDays = Number(packageItem.duration.match(/\d+ Days/)?.[0].split(' ')[0]) || 1;
+    const total = Math.round((packageItem.basePrice + transportRates[transport]) * travelers * (stayDays / includedDays));
+    totalElement.textContent = `Estimated total for ${travelers} traveler${travelers === 1 ? '' : 's'} and ${stayDays} day${stayDays === 1 ? '' : 's'}: ₹${total.toLocaleString('en-IN')}`;
   };
-  document.getElementById('contactPackage')?.addEventListener('input', updateBookingTotal);
-  document.getElementById('contactTransport')?.addEventListener('input', updateBookingTotal);
-  document.getElementById('contactTravelers')?.addEventListener('input', () => { suggestTransport(); updateBookingTotal(); });
+  const updateSuggestion = () => {
+    const packageItem = packageCatalog.find((item) => item.id === packageSelect?.value);
+    const spot = indiaSpots.find((item) => item.name === destinationSelect?.value);
+    const travelers = Math.min(20, Math.max(1, Number(travelersInput?.value) || 1));
+    const stayDays = Math.min(30, Math.max(1, Number(stayDaysInput?.value) || 1));
+    const transport = document.getElementById('contactTransport')?.value;
+    const suggestion = document.getElementById('bookingSuggestion');
+    if (!suggestion) return;
+    if (!packageItem || !spot) {
+      suggestion.textContent = 'Choose a package, state, and tourist spot to get a travel suggestion.';
+      return;
+    }
+    suggestion.innerHTML = `<strong>Suggested plan:</strong> ${stayDays} days in ${spot.name}, ${spot.state}, using ${transport || 'the best available transport'} for ${travelers} traveler${travelers === 1 ? '' : 's'}. ${packageItem.name} includes ${packageItem.includes.slice(0, 2).join(' and ')}.`;
+  };
+  [packageSelect, document.getElementById('contactTransport'), travelersInput, stayDaysInput, destinationSelect].forEach((element) => element?.addEventListener('input', () => { updateDetails(); updateBookingTotal(); updateSuggestion(); }));
+  travelersInput?.addEventListener('input', () => { suggestTransport(); updateBookingTotal(); updateSuggestion(); });
   suggestTransport();
+  updateDetails();
+  updateSuggestion();
   document.querySelectorAll('.package-actions a[href="#contact"]').forEach((button) => button.addEventListener('click', () => {
     const packageCard = button.closest('.package-card');
     const packageSelect = document.getElementById('contactPackage');
@@ -249,9 +288,10 @@ document.addEventListener('DOMContentLoaded', () => {
       destination: document.getElementById('contactDestination').value,
       packageId: document.getElementById('contactPackage').value,
       travelers: Number(document.getElementById('contactTravelers').value),
+      stayDays: Number(document.getElementById('contactStayDays').value),
       transport: document.getElementById('contactTransport').value,
       estimatedPrice: document.getElementById('bookingTotal').textContent,
-      message: document.getElementById('contactMessage').value
+      suggestion: document.getElementById('bookingSuggestion').textContent
     };
     await submitToFirebase(payload, 'contactMessageResult', 'Thank you. Our travel team will contact you soon.');
   });

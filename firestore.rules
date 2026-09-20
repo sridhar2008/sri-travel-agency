@@ -4,7 +4,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
     match /submissions/{submissionId} {
       allow create: if request.resource.data.keys().hasOnly([
-          'type', 'email', 'createdAt', 'name', 'phone', 'state', 'destination', 'packageId', 'travelers', 'transport', 'estimatedPrice', 'message'
+          'type', 'email', 'createdAt', 'name', 'phone', 'state', 'destination', 'packageId', 'travelers', 'stayDays', 'transport', 'estimatedPrice', 'suggestion'
         ])
         && request.resource.data.type in ['contact', 'newsletter']
         && request.resource.data.email is string
@@ -17,17 +17,23 @@ service cloud.firestore {
             && request.resource.data.state is string
             && request.resource.data.state.size() > 0
             && request.resource.data.state.size() <= 80
+            && request.resource.data.destination is string
+            && request.resource.data.destination.size() > 0
+            && request.resource.data.destination.size() <= 80
             && request.resource.data.packageId is string
             && request.resource.data.packageId.size() > 0
             && request.resource.data.travelers is int
             && request.resource.data.travelers >= 1
             && request.resource.data.travelers <= 20
+            && request.resource.data.stayDays is int
+            && request.resource.data.stayDays >= 1
+            && request.resource.data.stayDays <= 30
             && request.resource.data.transport is string
             && request.resource.data.transport.size() > 0
             && request.resource.data.estimatedPrice is string
-            && request.resource.data.message is string
-            && request.resource.data.message.size() > 0
-            && request.resource.data.message.size() <= 2000));
+            && request.resource.data.suggestion is string
+            && request.resource.data.suggestion.size() > 0
+            && request.resource.data.suggestion.size() <= 2000));
       allow read, update, delete: if request.auth != null
         && request.auth.token.admin == true;
     }

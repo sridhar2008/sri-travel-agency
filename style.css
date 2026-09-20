@@ -90,6 +90,9 @@ input:focus, select:focus, textarea:focus { border-color: var(--blue); }
 .newsletter { padding: 70px 0; text-align: center; background: var(--sky); } .newsletter-text { margin: 8px 0 20px; color: var(--muted); } .newsletter-form { display: flex; max-width: 540px; margin: auto; gap: 8px; } .newsletter-form input { flex: 1; }
 .contact-grid { display: grid; grid-template-columns: .8fr 1.2fr; gap: 60px; } .contact-info { display: grid; align-content: start; gap: 25px; } .contact-item { display: flex; gap: 14px; } .contact-icon { font-size: 1.5rem; } .contact-item h4 { margin-bottom: 3px; } .contact-item p { color: var(--muted); font-size: .9rem; } .contact-row { grid-template-columns: 1fr 1fr; margin-bottom: 14px; } .contact-form > .form-group { margin-bottom: 14px; }
 .booking-total { margin: 4px 0 14px; padding: 14px; border-left: 4px solid var(--gold); color: var(--navy); background: var(--sky); font-weight: 700; }
+.booking-details, .booking-suggestion { margin: 4px 0 14px; padding: 14px; border: 1px solid var(--line); color: var(--muted); background: var(--soft); font-size: .85rem; }
+.booking-details strong, .booking-suggestion strong { color: var(--navy); }
+.booking-suggestion { border-left: 4px solid var(--blue); color: var(--ink); background: #eef7fc; }
 .admin-shell { width: min(1320px, calc(100% - 40px)); margin: auto; }
 .login-panel { width: min(440px, 100%); margin: 0 auto; padding: 38px; border-radius: 8px; background: var(--paper); box-shadow: var(--shadow); }
 .login-panel h2, .dashboard h2 { margin: 0 0 8px; color: var(--navy); }

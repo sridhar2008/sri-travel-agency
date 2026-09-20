@@ -1,3 +1,4 @@
+- `POST /api/contact` with `{ "name": "...", "email": "...", "phone": "...", "state": "...", "destination": "...", "packageId": "...", "travelers": 2, "stayDays": 3, "transport": "...", "estimatedPrice": "...", "suggestion": "..." }`
 # Sri Travel Agency
 
 ## Run locally
