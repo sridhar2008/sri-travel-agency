@@ -1,4 +1,128 @@
+const imageSet = [
+  'https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1598091383021-15ddea10925d?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1589308078059-be1415eab4c3?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=800&q=80'
+];
+
+const indiaSpots = [
+  ['Agra', 'Uttar Pradesh', 'Taj Mahal, Agra Fort and Mughal heritage'],
+  ['Ahmedabad', 'Gujarat', 'Sabarmati Ashram, stepwells and Gujarati culture'],
+  ['Alappuzha', 'Kerala', 'Houseboats, lagoons and peaceful backwaters'],
+  ['Amritsar', 'Punjab', 'Golden Temple, history and famous Punjabi food'],
+  ['Andaman', 'Andaman and Nicobar', 'Beaches, coral reefs and island adventures'],
+  ['Aurangabad', 'Maharashtra', 'Ajanta and Ellora caves and Deccan heritage'],
+  ['Bengaluru', 'Karnataka', 'Gardens, palaces, cafés and modern city life'],
+  ['Rameswaram', 'Tamil Nadu', 'Ramanathaswamy Temple, beaches and island heritage'],
+  ['Bodh Gaya', 'Bihar', 'Mahabodhi Temple and Buddhist pilgrimage'],
+  ['Chennai', 'Tamil Nadu', 'Marina Beach, temples, museums and city culture'],
+  ['Coimbatore', 'Tamil Nadu', 'Isha Yoga Centre, hills and western Tamil Nadu'],
+  ['Darjeeling', 'West Bengal', 'Tea gardens, toy train and Himalayan views'],
+  ['Dehradun', 'Uttarakhand', 'Forest gateways, caves and Himalayan foothills'],
+  ['Gangtok', 'Sikkim', 'Monasteries, mountain roads and Kanchenjunga views'],
+  ['Goa', 'Goa', 'Beaches, forts, food and Portuguese heritage'],
+  ['Gokarna', 'Karnataka', 'Quiet beaches, temples and coastal trails'],
+  ['Hampi', 'Karnataka', 'Ruins, boulders and the Vijayanagara story'],
+  ['Haridwar', 'Uttarakhand', 'Ganga aarti, ghats and spiritual journeys'],
+  ['Hyderabad', 'Telangana', 'Charminar, forts, biryani and old-city culture'],
+  ['Jaipur', 'Rajasthan', 'Forts, palaces, bazaars and royal history'],
+  ['Jaisalmer', 'Rajasthan', 'Golden Fort, camel safaris and desert camps'],
+  ['Jodhpur', 'Rajasthan', 'Mehrangarh Fort and the blue city lanes'],
+  ['Kanyakumari', 'Tamil Nadu', 'Sunrise, sunset and the meeting of three seas'],
+  ['Kasauli', 'Himachal Pradesh', 'Quiet hill walks and colonial mountain charm'],
+  ['Kashmir', 'Jammu and Kashmir', 'Shikara rides, gardens and alpine valleys'],
+  ['Kochi', 'Kerala', 'Fort Kochi, spice markets and harbour heritage'],
+  ['Kodaikanal', 'Tamil Nadu', 'Misty lakes, pine forests and hill viewpoints'],
+  ['Kolkata', 'West Bengal', 'Colonial landmarks, art, literature and cuisine'],
+  ['Kovalam', 'Kerala', 'Lighthouse beach, Ayurveda and coastal relaxation'],
+  ['Kullu', 'Himachal Pradesh', 'River valleys, temples and mountain villages'],
+  ['Leh', 'Ladakh', 'Monasteries, high passes and Himalayan landscapes'],
+  ['Lonavala', 'Maharashtra', 'Waterfalls, forts and monsoon viewpoints'],
+  ['Lucknow', 'Uttar Pradesh', 'Nawabi architecture, chikankari and kebabs'],
+  ['Madurai', 'Tamil Nadu', 'Meenakshi Temple and living Tamil culture'],
+  ['Mahabalipuram', 'Tamil Nadu', 'Shore Temple, stone carvings and coastal history'],
+  ['Manali', 'Himachal Pradesh', 'Snow peaks, river valleys and adventure sports'],
+  ['Matheran', 'Maharashtra', 'Vehicle-free hill station and forest viewpoints'],
+  ['Munnar', 'Kerala', 'Tea plantations, misty hills and wildlife'],
+  ['Mysuru', 'Karnataka', 'Mysore Palace, markets and royal traditions'],
+  ['Nainital', 'Uttarakhand', 'Lake boating, hills and family-friendly escapes'],
+  ['Ooty', 'Tamil Nadu', 'Nilgiri train, tea gardens and cool mountain air'],
+  ['Pachmarhi', 'Madhya Pradesh', 'Waterfalls, caves and Satpura forests'],
+  ['Pondicherry', 'Puducherry', 'French quarter, promenade and coastal cafés'],
+  ['Puri', 'Odisha', 'Jagannath Temple, beaches and coastal culture'],
+  ['Ranthambore', 'Rajasthan', 'Tiger safaris, forests and ancient fort ruins'],
+  ['Rishikesh', 'Uttarakhand', 'Yoga, rafting and Ganga river adventures'],
+  ['Shimla', 'Himachal Pradesh', 'The Ridge, toy train and Himalayan views'],
+  ['Srinagar', 'Jammu and Kashmir', 'Dal Lake, Mughal gardens and houseboats'],
+  ['Thanjavur', 'Tamil Nadu', 'Brihadeeswarar Temple, art and Chola heritage'],
+  ['Udaipur', 'Rajasthan', 'Lakes, palaces and romantic old-city views'],
+  ['Varanasi', 'Uttar Pradesh', 'Ghats, Ganga aarti and spiritual traditions'],
+  ['Wayanad', 'Kerala', 'Rainforests, waterfalls and tribal heritage']
+].map(([name, state, summary], index) => ({ name, state, summary, image: imageSet[index % imageSet.length], price: `₹${(8999 + (index % 8) * 2000).toLocaleString('en-IN')}` }));
+
+const packageCatalog = [
+  ['rajasthan-royal', 'Rajasthan Royal Circuit', 'Jaipur, Jodhpur & Udaipur', '6 Nights / 7 Days', '₹28,999', '4.9', ['Hotel', 'Fort Tours', 'Desert Camp', 'Breakfast'], 'Best Seller'],
+  ['kashmir-valley', 'Kashmir Valley Escape', 'Srinagar, Gulmarg & Pahalgam', '5 Nights / 6 Days', '₹24,999', '4.9', ['Houseboat', 'Shikara Ride', 'Valley Tour', 'Breakfast'], 'Popular'],
+  ['kerala-backwaters', 'Kerala Backwater Trail', 'Kochi, Munnar & Alappuzha', '5 Nights / 6 Days', '₹21,999', '4.8', ['Hotel', 'Houseboat', 'Tea Gardens', 'Transfers'], ''],
+  ['goa-coast', 'Goa Coast & Culture', 'North Goa & South Goa', '3 Nights / 4 Days', '₹13,999', '4.7', ['Hotel', 'Beach Tour', 'Sightseeing', 'Breakfast'], ''],
+  ['ladakh-highways', 'Ladakh Highways', 'Leh, Nubra & Pangong', '6 Nights / 7 Days', '₹32,999', '4.9', ['Hotel', 'Monastery Tour', 'Scenic Drive', 'Permits'], 'Adventure'],
+  ['andaman-islands', 'Andaman Island Escape', 'Port Blair & Havelock', '4 Nights / 5 Days', '₹26,999', '4.8', ['Hotel', 'Ferry Tickets', 'Island Tour', 'Breakfast'], ''],
+  ['tamil-nadu-heritage', 'Tamil Nadu Heritage Route', 'Chennai, Mahabalipuram & Thanjavur', '5 Nights / 6 Days', '₹19,999', '4.8', ['Hotel', 'Temple Tours', 'Guide', 'Transfers'], 'New'],
+  ['nilgiri-hills', 'Nilgiri Hills Retreat', 'Ooty, Coonoor & Coimbatore', '3 Nights / 4 Days', '₹14,999', '4.7', ['Resort', 'Toy Train', 'Tea Estate', 'Breakfast'], ''],
+  ['madurai-kanyakumari', 'Temple Coast Journey', 'Madurai, Rameswaram & Kanyakumari', '4 Nights / 5 Days', '₹16,999', '4.8', ['Hotel', 'Temple Tours', 'Local Guide', 'Transfers'], ''],
+  ['himachal-mountains', 'Himachal Mountain Trail', 'Shimla, Manali & Kullu', '6 Nights / 7 Days', '₹23,999', '4.8', ['Hotel', 'Valley Tours', 'Volvo Bus', 'Breakfast'], 'Popular'],
+  ['uttarakhand-spiritual', 'Uttarakhand Spiritual Trail', 'Haridwar, Rishikesh & Dehradun', '4 Nights / 5 Days', '₹15,999', '4.7', ['Hotel', 'Ganga Aarti', 'River Rafting', 'Transfers'], ''],
+  ['meghalaya-clouds', 'Meghalaya Cloud Country', 'Shillong, Cherrapunji & Dawki', '5 Nights / 6 Days', '₹22,999', '4.8', ['Hotel', 'Waterfalls', 'Local Driver', 'Breakfast'], ''],
+  ['sikkim-himalaya', 'Sikkim Himalayan Views', 'Gangtok, Pelling & Tsomgo Lake', '5 Nights / 6 Days', '₹24,999', '4.8', ['Hotel', 'Lake Permit', 'Monastery Tour', 'Transfers'], ''],
+  ['rajasthan-safari', 'Ranthambore Wildlife', 'Jaipur, Ranthambore & Pushkar', '5 Nights / 6 Days', '₹25,999', '4.7', ['Hotel', 'Safari', 'Fort Tour', 'Breakfast'], 'Wildlife'],
+  ['odisha-coast', 'Odisha Temple & Coast', 'Bhubaneswar, Puri & Konark', '4 Nights / 5 Days', '₹17,999', '4.7', ['Hotel', 'Temple Tours', 'Beach Visit', 'Transfers'], ''],
+  ['karnataka-heritage', 'Karnataka Heritage Drive', 'Bengaluru, Mysuru & Hampi', '6 Nights / 7 Days', '₹22,999', '4.8', ['Hotel', 'Palace Tour', 'Heritage Guide', 'Car'], ''],
+  ['maharashtra-forts', 'Maharashtra Forts & Hills', 'Mumbai, Lonavala & Aurangabad', '5 Nights / 6 Days', '₹20,999', '4.7', ['Hotel', 'Cave Tour', 'Fort Visit', 'Transfers'], ''],
+  ['gujarat-culture', 'Gujarat Culture Circuit', 'Ahmedabad, Rann of Kutch & Dwarka', '6 Nights / 7 Days', '₹27,999', '4.8', ['Hotel', 'Rann Visit', 'Temple Tour', 'Breakfast'], ''],
+  ['uttar-pradesh-spiritual', 'Uttar Pradesh Spiritual Trail', 'Agra, Lucknow & Varanasi', '5 Nights / 6 Days', '₹21,999', '4.9', ['Hotel', 'Taj Mahal', 'Ganga Aarti', 'Guide'], 'Best Seller'],
+  ['central-india-wildlife', 'Central India Nature Tour', 'Bhopal, Pachmarhi & Khajuraho', '5 Nights / 6 Days', '₹20,999', '4.7', ['Hotel', 'Forest Visit', 'Heritage Tour', 'Car'], '']
+].map(([id, name, destination, duration, price, rating, includes, badge], index) => ({ id, name, destination, duration, price, rating, includes, badge, image: imageSet[index % imageSet.length], description: `A carefully planned ${name.toLowerCase()} covering ${destination} with local experiences and comfortable travel.` }));
+
+const renderTravelCatalog = () => {
+  const destinationGrid = document.querySelector('.dest-grid');
+  const packageGrid = document.querySelector('.package-grid');
+  if (destinationGrid) {
+    destinationGrid.innerHTML = indiaSpots.map((spot) => `
+      <article class="dest-card reveal">
+        <div class="dest-img-box"><img src="${spot.image}" alt="${spot.name}, ${spot.state}" loading="lazy"></div>
+        <div class="dest-info"><h3>${spot.name}</h3><span class="dest-location">${spot.state}</span><p>${spot.summary}</p>
+          <div class="dest-footer"><span class="dest-price">From ${spot.price}</span><a href="#packages" class="btn btn-outline dest-btn">View Packages</a></div>
+        </div>
+      </article>`).join('');
+  }
+  if (packageGrid) {
+    packageGrid.innerHTML = packageCatalog.map((item) => `
+      <article class="package-card reveal" data-package="${item.id}">
+        <div class="package-img-box"><img src="${item.image}" alt="${item.name}" loading="lazy">${item.badge ? `<span class="package-badge">${item.badge}</span>` : ''}</div>
+        <div class="package-body"><div class="package-top"><h3>${item.name}</h3><span class="package-rating">★ ${item.rating}</span></div>
+          <p class="package-duration">${item.destination} · ${item.duration}</p><ul class="package-includes">${item.includes.map((include) => `<li>✓ ${include}</li>`).join('')}</ul>
+          <p class="package-price">From <strong>${item.price}</strong></p><div class="package-actions"><button class="btn btn-outline view-details" data-package="${item.id}">View Package</button><a href="#contact" class="btn btn-primary">Book Now</a></div>
+        </div>
+      </article>`).join('');
+  }
+};
+
+const populateDestinationOptions = () => {
+  ['searchDestination', 'contactDestination'].forEach((id) => {
+    const select = document.getElementById(id);
+    if (!select) return;
+    select.innerHTML = '<option value="">Select destination</option>';
+    indiaSpots.forEach((spot) => select.add(new Option(`${spot.name}, ${spot.state}`, spot.name)));
+  });
+};
+
 document.addEventListener('DOMContentLoaded', () => {
+  renderTravelCatalog();
+  populateDestinationOptions();
   const navbar = document.getElementById('navbar');
   const hamburger = document.getElementById('hamburger');
   const slides = [...document.querySelectorAll('.hero-slide')];
@@ -78,14 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
     await submitToFirebase(payload, 'contactMessageResult', 'Thank you. Our travel team will contact you soon.');
   });
 
-  const packageDetails = {
-    rajasthan: ['Rajasthan Royal Trail', 'Explore royal forts, desert landscapes, heritage stays and colourful markets.'],
-    ladakh: ['Ladakh Mountain Explorer', 'Travel through high passes, monasteries and dramatic Himalayan valleys.'],
-    kerala: ['Kerala Serenity', 'Slow down with a houseboat experience, sightseeing and peaceful backwater views.'],
-    goa: ['Goa Getaway', 'Enjoy beaches, local sights and a flexible coastal escape.'],
-    andaman: ['Andaman Island Escape', 'Enjoy coral reefs, island beaches, water sports and peaceful sunsets.'],
-    kashmir: ['Kashmir Valley Retreat', 'Take in shikara rides, alpine valleys, gardens and snowy mountain views.']
-  };
+  const packageDetails = Object.fromEntries(packageCatalog.map((item) => [item.id, [item.name, item.description]]));
   const modal = document.getElementById('packageModal');
   const modalContent = document.getElementById('modalContent');
   const closeModal = () => { modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true'); };
