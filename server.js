@@ -8,9 +8,12 @@ const PORT = Number(process.env.PORT) || 3000;
 const ROOT_DIR = __dirname;
 const DATA_FILE = path.join(ROOT_DIR, 'data', 'submissions.json');
 const DATABASE_FILE = path.join(ROOT_DIR, 'data', 'submissions.sqlite');
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'sriagency';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'asdfghjkl';
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || '';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 const adminSessions = new Map();
+const loginAttempts = new Map();
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
 const STATIC_TYPES = {
   '.css': 'text/css; charset=utf-8',
   '.html': 'text/html; charset=utf-8',
@@ -20,7 +23,13 @@ const STATIC_TYPES = {
 };
 
 const sendJson = (response, statusCode, payload) => {
-  response.writeHead(statusCode, { 'Content-Type': 'application/json; charset=utf-8' });
+  response.writeHead(statusCode, {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Cache-Control': 'no-store',
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    'Referrer-Policy': 'no-referrer'
+  });
   response.end(JSON.stringify(payload));
 };
 
@@ -39,6 +48,12 @@ const readRequestBody = (request) => new Promise((resolve, reject) => {
 
 const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 const clean = (value) => typeof value === 'string' ? value.trim() : '';
+const isValidLength = (value, maximum) => value.length <= maximum;
+const safeEqual = (left, right) => {
+  const leftBuffer = Buffer.from(left);
+  const rightBuffer = Buffer.from(right);
+  return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
+};
 
 const database = new DatabaseSync(DATABASE_FILE);
 
@@ -53,6 +68,7 @@ const initializeDatabase = async () => {
       name TEXT,
       phone TEXT,
       destination TEXT,
+      transport TEXT,
       message TEXT
     );
     CREATE TABLE IF NOT EXISTS migrations (
@@ -60,6 +76,11 @@ const initializeDatabase = async () => {
       completed_at TEXT NOT NULL
     );
   `);
+  try {
+    database.exec('ALTER TABLE submissions ADD COLUMN transport TEXT');
+  } catch (error) {
+    if (!error.message.includes('duplicate column name')) throw error;
+  }
 
   const migration = database.prepare('SELECT name FROM migrations WHERE name = ?').get('json-submissions');
   if (migration) return;
@@ -75,8 +96,8 @@ const initializeDatabase = async () => {
   database.exec('BEGIN');
   try {
     const insert = database.prepare(`
-      INSERT INTO submissions (id, type, created_at, email, name, phone, destination, message)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO submissions (id, type, created_at, email, name, phone, destination, transport, message)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     for (const submission of submissions) {
       insert.run(
@@ -87,6 +108,7 @@ const initializeDatabase = async () => {
         submission.name ?? null,
         submission.phone ?? null,
         submission.destination ?? null,
+        submission.transport ?? null,
         submission.message ?? null
       );
     }
@@ -100,8 +122,8 @@ const initializeDatabase = async () => {
 
 const saveSubmission = (submission) => {
   database.prepare(`
-    INSERT INTO submissions (id, type, created_at, email, name, phone, destination, message)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO submissions (id, type, created_at, email, name, phone, destination, transport, message)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     submission.id,
     submission.type,
@@ -110,12 +132,13 @@ const saveSubmission = (submission) => {
     submission.name ?? null,
     submission.phone ?? null,
     submission.destination ?? null,
+    submission.transport ?? null,
     submission.message ?? null
   );
 };
 
 const readSubmissions = () => database.prepare(`
-  SELECT id, type, created_at, email, name, phone, destination, message
+  SELECT id, type, created_at, email, name, phone, destination, transport, message
   FROM submissions
   ORDER BY rowid ASC
 `).all().map((submission) => {
@@ -129,6 +152,7 @@ const readSubmissions = () => database.prepare(`
     result.name = submission.name || '';
     result.phone = submission.phone || '';
     result.destination = submission.destination || '';
+    result.transport = submission.transport || '';
     result.message = submission.message || '';
   }
   return result;
@@ -152,15 +176,32 @@ const isAdmin = (request) => {
 };
 
 const handleAdminLogin = async (request, response) => {
+  if (!ADMIN_USERNAME || !ADMIN_PASSWORD) {
+    return sendJson(response, 503, { error: 'Admin login is not configured.' });
+  }
+  const clientAddress = request.socket.remoteAddress || 'unknown';
+  const attempt = loginAttempts.get(clientAddress) || { count: 0, startedAt: Date.now() };
+  if (Date.now() - attempt.startedAt > LOGIN_WINDOW_MS) {
+    attempt.count = 0;
+    attempt.startedAt = Date.now();
+  }
+  if (attempt.count >= MAX_LOGIN_ATTEMPTS) {
+    return sendJson(response, 429, { error: 'Too many login attempts. Try again later.' });
+  }
   let payload;
   try {
     payload = JSON.parse(await readRequestBody(request));
   } catch {
     return sendJson(response, 400, { error: 'Please send valid JSON.' });
   }
-  if (payload.username !== ADMIN_USERNAME || payload.password !== ADMIN_PASSWORD) {
+  const username = clean(payload.username);
+  const password = typeof payload.password === 'string' ? payload.password : '';
+  if (!safeEqual(username, ADMIN_USERNAME) || !safeEqual(password, ADMIN_PASSWORD)) {
+    attempt.count += 1;
+    loginAttempts.set(clientAddress, attempt);
     return sendJson(response, 401, { error: 'Invalid admin credentials.' });
   }
+  loginAttempts.delete(clientAddress);
   const token = crypto.randomBytes(32).toString('hex');
   adminSessions.set(token, Date.now() + 8 * 60 * 60 * 1000);
   return sendJson(response, 200, { token });
@@ -190,7 +231,7 @@ const handleSubmission = async (request, response, type) => {
   }
 
   const email = clean(payload.email);
-  if (!validateEmail(email)) {
+  if (!validateEmail(email) || !isValidLength(email, 254)) {
     return sendJson(response, 400, { error: 'Please provide a valid email address.' });
   }
 
@@ -199,8 +240,14 @@ const handleSubmission = async (request, response, type) => {
     submission.name = clean(payload.name);
     submission.phone = clean(payload.phone);
     submission.destination = clean(payload.destination);
+    submission.transport = clean(payload.transport);
     submission.message = clean(payload.message);
-    if (!submission.name || !submission.message) {
+    if (!submission.name || !submission.message
+      || !isValidLength(submission.name, 120)
+      || !isValidLength(submission.phone, 40)
+      || !isValidLength(submission.destination, 80)
+      || !isValidLength(submission.transport, 40)
+      || !isValidLength(submission.message, 2000)) {
       return sendJson(response, 400, { error: 'Name and message are required.' });
     }
   }
@@ -216,11 +263,21 @@ const handleSubmission = async (request, response, type) => {
 const serveStatic = async (request, response) => {
   const requestPath = decodeURIComponent(request.url === '/' ? '/index.html' : request.url.split('?')[0]);
   const filePath = path.resolve(ROOT_DIR, `.${requestPath}`);
-  if (!filePath.startsWith(ROOT_DIR)) return sendJson(response, 403, { error: 'Forbidden.' });
+  const relativePath = path.relative(ROOT_DIR, filePath);
+  if (!relativePath || relativePath.startsWith('..') || path.isAbsolute(relativePath)
+    || relativePath === 'data' || relativePath.startsWith(`data${path.sep}`)
+    || relativePath.startsWith('.env')) {
+    return sendJson(response, 403, { error: 'Forbidden.' });
+  }
   try {
     const content = await fs.readFile(filePath);
     const contentType = STATIC_TYPES[path.extname(filePath)] || 'application/octet-stream';
-    response.writeHead(200, { 'Content-Type': contentType });
+    response.writeHead(200, {
+      'Content-Type': contentType,
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'Referrer-Policy': 'no-referrer'
+    });
     response.end(content);
   } catch (error) {
     sendJson(response, error.code === 'ENOENT' ? 404 : 500, { error: 'Not found.' });

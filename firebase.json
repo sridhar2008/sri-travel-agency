@@ -10,7 +10,7 @@
       "firestore.indexes.json",
       "**/.*",
       "**/node_modules/**",
-      "data/submissions.sqlite"
+      "data/**"
     ],
     "cleanUrls": true
   }

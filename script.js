@@ -54,6 +54,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const destination = document.getElementById('searchDestination').value;
     setMessage('searchResult', destination ? `Great choice. Showing trips for ${destination}.` : 'Please choose a destination to search.');
   });
+  document.getElementById('transportChoice')?.addEventListener('change', (event) => {
+    const contactTransport = document.getElementById('contactTransport');
+    if (contactTransport) contactTransport.value = event.target.value;
+  });
   document.getElementById('newsletterForm')?.addEventListener('submit', async (event) => {
     event.preventDefault();
     const email = document.getElementById('newsletterEmail').value.trim();
@@ -68,18 +72,19 @@ document.addEventListener('DOMContentLoaded', () => {
       email: document.getElementById('contactEmail').value,
       phone: document.getElementById('contactPhone').value,
       destination: document.getElementById('contactDestination').value,
+      transport: document.getElementById('contactTransport').value,
       message: document.getElementById('contactMessage').value
     };
     await submitToFirebase(payload, 'contactMessageResult', 'Thank you. Our travel team will contact you soon.');
   });
 
   const packageDetails = {
-    maldives: ['Maldives Escape', 'A relaxing island stay with a guided tour, breakfast and airport transfers.'],
-    dubai: ['Dubai Explorer', 'See the city skyline, explore the desert and enjoy a comfortable hotel stay.'],
+    rajasthan: ['Rajasthan Royal Trail', 'Explore royal forts, desert landscapes, heritage stays and colourful markets.'],
+    ladakh: ['Ladakh Mountain Explorer', 'Travel through high passes, monasteries and dramatic Himalayan valleys.'],
     kerala: ['Kerala Serenity', 'Slow down with a houseboat experience, sightseeing and peaceful backwater views.'],
     goa: ['Goa Getaway', 'Enjoy beaches, local sights and a flexible coastal escape.'],
-    bali: ['Bali Adventure', 'Discover temples, tropical landscapes and memorable island activities.'],
-    switzerland: ['Switzerland Dream Tour', 'Experience alpine scenery, scenic trains and charming mountain towns.']
+    andaman: ['Andaman Island Escape', 'Enjoy coral reefs, island beaches, water sports and peaceful sunsets.'],
+    kashmir: ['Kashmir Valley Retreat', 'Take in shikara rides, alpine valleys, gardens and snowy mountain views.']
   };
   const modal = document.getElementById('packageModal');
   const modalContent = document.getElementById('modalContent');
