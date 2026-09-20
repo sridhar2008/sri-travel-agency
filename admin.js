@@ -29,6 +29,7 @@ const renderSubmissions = (submissions) => {
       <td>${escapeHtml(submission.name || '-')}</td>
       <td><a class="admin-link" href="mailto:${escapeAttribute(submission.email)}">${escapeHtml(submission.email)}</a></td>
       <td>${submission.phone ? `<a class="admin-link" href="tel:${escapeAttribute(submission.phone)}">${escapeHtml(submission.phone)}</a>` : '-'}</td>
+      <td>${escapeHtml(submission.state || '-')}</td>
       <td>${escapeHtml(submission.destination || '-')}</td>
       <td>${escapeHtml(submission.packageId || '-')}</td>
       <td>${escapeHtml(submission.travelers || '-')}</td>
@@ -37,7 +38,7 @@ const renderSubmissions = (submissions) => {
       <td>${escapeHtml(submission.message || '-')}</td>
       <td>${escapeHtml(submission.createdAt?.toDate().toLocaleString() || '-')}</td>
       <td><button class="delete-submission" type="button" data-id="${escapeAttribute(submission.id)}">Delete</button></td>
-    </tr>`).join('') : '<tr><td class="empty" colspan="12">No submissions yet.</td></tr>';
+    </tr>`).join('') : '<tr><td class="empty" colspan="13">No submissions yet.</td></tr>';
 };
 
 const loadDashboard = async () => {

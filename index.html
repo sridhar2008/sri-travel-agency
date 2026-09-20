@@ -136,32 +136,6 @@
       </div>
     </div>
   </section>
-  <!-- ============================ TRANSPORT ============================ -->
-  <section class="section transport-section" id="transport">
-    <div class="container">
-      <div class="section-header transport-heading reveal">
-        <span class="section-tag">Transport</span>
-        <h2 class="section-title">Famous Tourist Buses</h2>
-      </div>
-      <div class="transport-grid">
-        <article class="transport-card reveal">
-          <img class="transport-image" src="https://content.jdmagicbox.com/v2/comp/coimbatore/t7/0422px422.x422.240925203336.a1t7/catalogue/skt-transports-sidhapudur-coimbatore-travel-agents-9d88p3flxj-250.jpg" alt="SKT bus" loading="lazy">
-        </article>
-        <article class="transport-card reveal">
-          <img class="transport-image" src="https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&amp;fit=crop&amp;w=900&amp;q=85" alt="Tourist bus" loading="lazy">
-        </article>
-        <article class="transport-card reveal">
-          <img class="transport-image" src="https://images.unsplash.com/photo-1494515843206-f3117d3f51b7?auto=format&amp;fit=crop&amp;w=900&amp;q=85" alt="Tourist bus" loading="lazy">
-        </article>
-        <article class="transport-card reveal">
-          <img class="transport-image" src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&amp;fit=crop&amp;w=900&amp;q=85" alt="Tourist bus" loading="lazy">
-        </article>
-      </div>
-      <div class="transport-cta reveal">
-        <a href="#contact" class="btn btn-primary">Enquiry</a>
-      </div>
-    </div>
-  </section>
   <!-- ============================ POPULAR DESTINATIONS ============================ -->
   <section class="section" id="destinations">
     <div class="container">
@@ -691,35 +665,32 @@
               <input type="tel" id="contactPhone" placeholder="Your phone number">
             </div>
             <div class="form-group">
-              <label for="contactDestination">Destination</label>
-              <select id="contactDestination">
-                <option value="">Select destination</option>
-                <option>Rajasthan</option>
-                <option>Ladakh</option>
-                <option>Andaman</option>
-                <option>Goa</option>
-                <option>Kerala</option>
-                <option>Kashmir</option>
-                <option>Himachal Pradesh</option>
-                <option>Uttarakhand</option>
-                <option>Uttar Pradesh</option>
-                <option>Tamil Nadu</option>
-                <option>Meghalaya</option>
+              <label for="contactState">State</label>
+              <select id="contactState" required>
+                <option value="">Select state</option>
               </select>
             </div>
           </div>
-          <div class="form-group">
-            <label for="contactTransport">Preferred transport</label>
-            <select id="contactTransport" required>
-              <option value="">Select transport</option>
-              <option>Sri Kumaran Travels - Tourist Bus</option>
-              <option>SMT Travels - Tourist Bus</option>
-              <option>Train</option>
-              <option>IndiGo - Flight</option>
-              <option>Air India - Flight</option>
-              <option>Akasa Air - Flight</option>
-              <option>Tempo Traveller</option>
-            </select>
+          <div class="contact-row">
+            <div class="form-group">
+              <label for="contactDestination">Tourist spot</label>
+              <select id="contactDestination">
+                <option value="">Select a state first</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="contactTransport">Suggested transport</label>
+              <select id="contactTransport" required>
+                <option value="">Select transport</option>
+                <option>Tourist Bus</option>
+                <option>Train</option>
+                <option>Car-4</option>
+                <option>Car-7</option>
+                <option>Maxi Cab</option>
+                <option>Traveller</option>
+                <option>Airline</option>
+              </select>
+            </div>
           </div>
           <div class="booking-total" id="bookingTotal" aria-live="polite">Choose a package and transport to see your estimated total.</div>
           <div class="form-group">
@@ -770,6 +741,7 @@
                 <th>Name</th>
                 <th>Email</th>
                 <th>Phone</th>
+                <th>State</th>
                 <th>Destination</th>
                 <th>Package</th>
                 <th>Travelers</th>

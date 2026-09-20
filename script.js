@@ -112,12 +112,22 @@ const renderTravelCatalog = () => {
 };
 
 const populateDestinationOptions = () => {
-  ['searchDestination', 'contactDestination'].forEach((id) => {
-    const select = document.getElementById(id);
-    if (!select) return;
-    select.innerHTML = '<option value="">Select destination</option>';
-    indiaSpots.forEach((spot) => select.add(new Option(`${spot.name}, ${spot.state}`, spot.name)));
-  });
+  const searchSelect = document.getElementById('searchDestination');
+  if (searchSelect) {
+    searchSelect.innerHTML = '<option value="">Select destination</option>';
+    indiaSpots.forEach((spot) => searchSelect.add(new Option(`${spot.name}, ${spot.state}`, spot.name)));
+  }
+  const stateSelect = document.getElementById('contactState');
+  const destinationSelect = document.getElementById('contactDestination');
+  const states = [...new Set(indiaSpots.map((spot) => spot.state))].sort();
+  if (stateSelect) states.forEach((state) => stateSelect.add(new Option(state, state)));
+  const updateDestinations = () => {
+    const selectedState = stateSelect?.value;
+    if (!destinationSelect) return;
+    destinationSelect.innerHTML = selectedState ? '<option value="">Select tourist spot</option>' : '<option value="">Select a state first</option>';
+    indiaSpots.filter((spot) => spot.state === selectedState).forEach((spot) => destinationSelect.add(new Option(spot.name, spot.name)));
+  };
+  stateSelect?.addEventListener('change', updateDestinations);
   const packageSelect = document.getElementById('contactPackage');
   if (packageSelect) packageCatalog.forEach((item) => packageSelect.add(new Option(`${item.name} - ${item.price} per person`, item.id)));
 };
@@ -185,13 +195,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (contactTransport) contactTransport.value = event.target.value;
   });
   const transportRates = {
-    'Sri Kumaran Travels - Tourist Bus': 1800,
-    'SMT Travels - Tourist Bus': 1800,
+    'Tourist Bus': 1800,
     Train: 2500,
-    'IndiGo - Flight': 6500,
-    'Air India - Flight': 7000,
-    'Akasa Air - Flight': 6000,
-    'Tempo Traveller': 3000
+    'Car-4': 3500,
+    'Car-7': 5000,
+    'Maxi Cab': 6500,
+    Traveller: 7500,
+    Airline: 7000
+  };
+  const suggestTransport = () => {
+    const travelers = Math.min(20, Math.max(1, Number(document.getElementById('contactTravelers')?.value) || 1));
+    const transport = travelers <= 4 ? 'Car-4' : travelers <= 7 ? 'Car-7' : travelers <= 12 ? 'Maxi Cab' : travelers <= 17 ? 'Traveller' : 'Tourist Bus';
+    const transportSelect = document.getElementById('contactTransport');
+    if (transportSelect) transportSelect.value = transport;
   };
   const updateBookingTotal = () => {
     const packageItem = packageCatalog.find((item) => item.id === document.getElementById('contactPackage')?.value);
@@ -206,7 +222,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const total = (packageItem.basePrice + transportRates[transport]) * travelers;
     totalElement.textContent = `Estimated total for ${travelers} traveler${travelers === 1 ? '' : 's'}: ₹${total.toLocaleString('en-IN')}`;
   };
-  ['contactPackage', 'contactTransport', 'contactTravelers'].forEach((id) => document.getElementById(id)?.addEventListener('input', updateBookingTotal));
+  document.getElementById('contactPackage')?.addEventListener('input', updateBookingTotal);
+  document.getElementById('contactTransport')?.addEventListener('input', updateBookingTotal);
+  document.getElementById('contactTravelers')?.addEventListener('input', () => { suggestTransport(); updateBookingTotal(); });
+  suggestTransport();
   document.querySelectorAll('.package-actions a[href="#contact"]').forEach((button) => button.addEventListener('click', () => {
     const packageCard = button.closest('.package-card');
     const packageSelect = document.getElementById('contactPackage');
@@ -226,6 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
       name: document.getElementById('contactName').value,
       email: document.getElementById('contactEmail').value,
       phone: document.getElementById('contactPhone').value,
+      state: document.getElementById('contactState').value,
       destination: document.getElementById('contactDestination').value,
       packageId: document.getElementById('contactPackage').value,
       travelers: Number(document.getElementById('contactTravelers').value),

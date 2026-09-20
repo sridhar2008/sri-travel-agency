@@ -67,6 +67,7 @@ const initializeDatabase = async () => {
       email TEXT NOT NULL,
       name TEXT,
       phone TEXT,
+      state TEXT,
       destination TEXT,
       package_id TEXT,
       travelers INTEGER,
@@ -91,6 +92,11 @@ const initializeDatabase = async () => {
       if (!error.message.includes('duplicate column name')) throw error;
     }
   }
+  try {
+    database.exec('ALTER TABLE submissions ADD COLUMN state TEXT');
+  } catch (error) {
+    if (!error.message.includes('duplicate column name')) throw error;
+  }
 
   const migration = database.prepare('SELECT name FROM migrations WHERE name = ?').get('json-submissions');
   if (migration) return;
@@ -106,8 +112,8 @@ const initializeDatabase = async () => {
   database.exec('BEGIN');
   try {
     const insert = database.prepare(`
-      INSERT INTO submissions (id, type, created_at, email, name, phone, destination, package_id, travelers, transport, estimated_price, message)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO submissions (id, type, created_at, email, name, phone, state, destination, package_id, travelers, transport, estimated_price, message)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     for (const submission of submissions) {
       insert.run(
@@ -117,6 +123,7 @@ const initializeDatabase = async () => {
         submission.email,
         submission.name ?? null,
         submission.phone ?? null,
+        submission.state ?? null,
         submission.destination ?? null,
         submission.packageId ?? null,
         submission.travelers ?? null,
@@ -135,8 +142,8 @@ const initializeDatabase = async () => {
 
 const saveSubmission = (submission) => {
   database.prepare(`
-    INSERT INTO submissions (id, type, created_at, email, name, phone, destination, package_id, travelers, transport, estimated_price, message)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO submissions (id, type, created_at, email, name, phone, state, destination, package_id, travelers, transport, estimated_price, message)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     submission.id,
     submission.type,
@@ -144,6 +151,7 @@ const saveSubmission = (submission) => {
     submission.email,
     submission.name ?? null,
     submission.phone ?? null,
+    submission.state ?? null,
     submission.destination ?? null,
     submission.packageId ?? null,
     submission.travelers ?? null,
@@ -154,7 +162,7 @@ const saveSubmission = (submission) => {
 };
 
 const readSubmissions = () => database.prepare(`
-  SELECT id, type, created_at, email, name, phone, destination, package_id, travelers, transport, estimated_price, message
+  SELECT id, type, created_at, email, name, phone, state, destination, package_id, travelers, transport, estimated_price, message
   FROM submissions
   ORDER BY rowid ASC
 `).all().map((submission) => {
@@ -167,6 +175,7 @@ const readSubmissions = () => database.prepare(`
   if (submission.type === 'contact') {
     result.name = submission.name || '';
     result.phone = submission.phone || '';
+    result.state = submission.state || '';
     result.destination = submission.destination || '';
     result.packageId = submission.package_id || '';
     result.travelers = submission.travelers || 0;
@@ -258,14 +267,16 @@ const handleSubmission = async (request, response, type) => {
   if (type === 'contact') {
     submission.name = clean(payload.name);
     submission.phone = clean(payload.phone);
+    submission.state = clean(payload.state);
     submission.destination = clean(payload.destination);
     submission.packageId = clean(payload.packageId);
     submission.travelers = Number.isInteger(payload.travelers) ? payload.travelers : 0;
     submission.transport = clean(payload.transport);
     submission.estimatedPrice = clean(payload.estimatedPrice);
     submission.message = clean(payload.message);
-    if (!submission.name || !submission.message
+    if (!submission.name || !submission.state || !submission.destination || !submission.message
       || !isValidLength(submission.name, 120)
+      || !isValidLength(submission.state, 80)
       || !isValidLength(submission.phone, 40)
       || !isValidLength(submission.destination, 80)
       || submission.travelers < 1 || submission.travelers > 20
