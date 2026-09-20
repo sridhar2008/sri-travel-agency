@@ -102,7 +102,7 @@ firebaseAuth.onAuthStateChanged((user) => {
   if (!user) return showLogin();
   user.getIdTokenResult(true).then((tokenResult) => {
     if (tokenResult.claims.admin !== true) {
-      setMessage(loginMessage, 'This account does not have admin access.');
+      setMessage(loginMessage, 'Admin access is not enabled for this account. Ask the site owner to assign the admin role, then sign in again.');
       return firebaseAuth.signOut();
     }
     return loadDashboard().catch((error) => setMessage(dashboardMessage, error.message));

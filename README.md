@@ -13,6 +13,14 @@ Open `http://localhost:3000` in a browser. The server serves the website and sav
 
 The hosted site uses Firebase Hosting, Firebase Authentication, and Firestore. Open the site's `#admin` section and sign in with a Firebase Email/Password account that has the custom claim `{ "admin": true }`. Accounts without that claim cannot view or change submissions. Local development still uses `npm start` and the SQLite fallback.
 
+If the correct account says it has no admin access, assign the claim from a trusted environment with the Firebase Admin SDK. Do not put a service-account key or claim-setting code in the browser:
+
+```js
+await getAuth().setCustomUserClaims('FIREBASE_USER_UID', { admin: true });
+```
+
+After assigning the claim, sign out and sign in again so Firebase refreshes the ID token. The Firestore rules intentionally reject every account that does not have this claim.
+
 For local admin login, set strong credentials before starting the server. The server will refuse admin login when they are missing and never uses a weak fallback password:
 
 ```powershell

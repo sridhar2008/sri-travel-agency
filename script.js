@@ -282,7 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const packageCard = button.closest('.package-card');
     const packageSelect = document.getElementById('contactPackage');
     if (packageCard && packageSelect) packageSelect.value = packageCard.dataset.package;
-    updateBookingTotal();
+    updateWizard();
   }));
   document.getElementById('newsletterForm')?.addEventListener('submit', async (event) => {
     event.preventDefault();
