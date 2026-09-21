@@ -18,6 +18,8 @@ const returnToHome = () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
+const authPersistence = firebaseAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(() => null);
+
 const createUserRecord = async (user, details = {}) => {
   await firebaseDb.collection('users').doc(user.uid).set({
     uniqueId: user.uid,
@@ -47,7 +49,9 @@ if (entryGate) {
     event.preventDefault();
     entryLoginMessage.textContent = 'Signing in...';
     try {
+      await authPersistence;
       await firebaseAuth.signInWithEmailAndPassword(document.getElementById('entryLoginEmail').value.trim(), document.getElementById('entryLoginPassword').value);
+      entryGate.hidden = true;
       entryLoginMessage.textContent = '';
       returnToHome();
     } catch (error) {
@@ -58,11 +62,13 @@ if (entryGate) {
     event.preventDefault();
     entryRegisterMessage.textContent = 'Creating your account...';
     try {
+      await authPersistence;
       const name = document.getElementById('entryName').value.trim();
       const email = document.getElementById('entryEmail').value.trim();
       const credential = await firebaseAuth.createUserWithEmailAndPassword(email, document.getElementById('entryPassword').value);
       await credential.user.updateProfile({ displayName: name });
       await createUserRecord(credential.user, { name, email });
+      entryGate.hidden = true;
       entryRegisterMessage.textContent = `Account created. Your unique ID is ${credential.user.uid}.`;
       returnToHome();
     } catch (error) {
@@ -128,6 +134,7 @@ if (userAuthPanel) {
     event.preventDefault();
     setMessage(userLoginMessage, 'Signing in...');
     try {
+      await authPersistence;
       await firebaseAuth.signInWithEmailAndPassword(
         document.getElementById('userLoginEmail').value.trim(),
         document.getElementById('userLoginPassword').value
