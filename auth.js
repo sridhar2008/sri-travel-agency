@@ -5,9 +5,18 @@ const authMessage = (error) => ({
   'auth/email-already-in-use': 'An account already exists for this email.',
   'auth/invalid-credential': 'Invalid email or password.',
   'auth/invalid-login-credentials': 'Invalid email or password.',
+  'auth/operation-not-allowed': 'Email/password sign-in is disabled. Enable it in Firebase Authentication > Sign-in method.',
+  'auth/unauthorized-domain': 'This website domain is not authorized in Firebase Authentication settings.',
+  'auth/network-request-failed': 'Network error. Check your internet connection and try again.',
+  'auth/too-many-requests': 'Too many attempts. Wait a moment and try again.',
   'auth/weak-password': 'Use a password with at least 8 characters.',
   'auth/user-not-found': 'No account exists for this email.'
 }[error.code] || error.message);
+
+const returnToHome = () => {
+  window.location.hash = '#home';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
 
 const createUserRecord = async (user, details = {}) => {
   await firebaseDb.collection('users').doc(user.uid).set({
@@ -40,6 +49,7 @@ if (entryGate) {
     try {
       await firebaseAuth.signInWithEmailAndPassword(document.getElementById('entryLoginEmail').value.trim(), document.getElementById('entryLoginPassword').value);
       entryLoginMessage.textContent = '';
+      returnToHome();
     } catch (error) {
       entryLoginMessage.textContent = authMessage(error);
     }
@@ -54,6 +64,7 @@ if (entryGate) {
       await credential.user.updateProfile({ displayName: name });
       await createUserRecord(credential.user, { name, email });
       entryRegisterMessage.textContent = `Account created. Your unique ID is ${credential.user.uid}.`;
+      returnToHome();
     } catch (error) {
       entryRegisterMessage.textContent = authMessage(error);
     }
@@ -122,6 +133,7 @@ if (userAuthPanel) {
         document.getElementById('userLoginPassword').value
       );
       setMessage(userLoginMessage, '');
+      returnToHome();
     } catch (error) {
       setMessage(userLoginMessage, authMessage(error));
     }
