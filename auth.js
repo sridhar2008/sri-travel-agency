@@ -35,6 +35,7 @@ if (entryGate) {
   const entryRegisterForm = document.getElementById('entryRegisterForm');
   const entryLoginMessage = document.getElementById('entryLoginMessage');
   const entryRegisterMessage = document.getElementById('entryRegisterMessage');
+  let entryAuthAttemptInProgress = false;
   const showEntryMode = (mode) => {
     const register = mode === 'register';
     entryLoginForm.hidden = register;
@@ -47,6 +48,7 @@ if (entryGate) {
   document.getElementById('entryRegisterTab').addEventListener('click', () => showEntryMode('register'));
   entryLoginForm.addEventListener('submit', async (event) => {
     event.preventDefault();
+    entryAuthAttemptInProgress = true;
     entryLoginMessage.textContent = 'Signing in...';
     try {
       await authPersistence;
@@ -55,11 +57,13 @@ if (entryGate) {
       entryLoginMessage.textContent = '';
       returnToHome();
     } catch (error) {
+      entryAuthAttemptInProgress = false;
       entryLoginMessage.textContent = authMessage(error);
     }
   });
   entryRegisterForm.addEventListener('submit', async (event) => {
     event.preventDefault();
+    entryAuthAttemptInProgress = true;
     entryRegisterMessage.textContent = 'Creating your account...';
     try {
       await authPersistence;
@@ -72,6 +76,7 @@ if (entryGate) {
       entryRegisterMessage.textContent = `Account created. Your unique ID is ${credential.user.uid}.`;
       returnToHome();
     } catch (error) {
+      entryAuthAttemptInProgress = false;
       entryRegisterMessage.textContent = authMessage(error);
     }
   });
@@ -89,7 +94,8 @@ if (entryGate) {
     }
   });
   firebaseAuth.onAuthStateChanged((user) => {
-    entryGate.hidden = Boolean(user);
+    if (user) entryAuthAttemptInProgress = false;
+    entryGate.hidden = Boolean(user) || entryAuthAttemptInProgress;
     document.body.classList.toggle('authenticated', Boolean(user));
   });
 }
