@@ -7,6 +7,8 @@ const submissionsBody = document.getElementById('submissionsBody');
 const summary = document.getElementById('summary');
 const logoutButton = document.getElementById('logoutButton');
 const refreshButton = document.getElementById('refreshButton');
+const adminForgotPassword = document.getElementById('adminForgotPassword');
+const fallbackAdminEmail = 'sridhar.govindan2008@gmail.com';
 
 const setMessage = (element, message) => { element.textContent = message; };
 const escapeHtml = (value) => String(value || '').replace(/[&<>'"]/g, (character) => ({
@@ -51,7 +53,7 @@ const loadDashboard = async () => {
   dashboard.hidden = false;
 };
 
-refreshButton.addEventListener('click', async () => {
+refreshButton?.addEventListener('click', async () => {
   refreshButton.disabled = true;
   refreshButton.textContent = 'Refreshing...';
   setMessage(dashboardMessage, '');
@@ -75,33 +77,50 @@ const deleteSubmission = async (id) => {
   }
 };
 
-submissionsBody.addEventListener('click', (event) => {
+submissionsBody?.addEventListener('click', (event) => {
   const button = event.target.closest('.delete-submission');
   if (button) deleteSubmission(button.dataset.id);
 });
 
-loginForm.addEventListener('submit', async (event) => {
+loginForm?.addEventListener('submit', async (event) => {
   event.preventDefault();
   setMessage(loginMessage, 'Signing in...');
   try {
     await firebaseAuth.signInWithEmailAndPassword(loginForm.username.value, loginForm.password.value);
     await loadDashboard();
   } catch (error) {
-    setMessage(loginMessage, error.code === 'auth/invalid-credential' ? 'Invalid email or password.' : error.message);
+    const message = {
+      'auth/user-not-found': 'No Firebase account exists for this email. Create the account in Firebase Authentication, then assign it the admin role.',
+      'auth/invalid-credential': 'Invalid email or password.',
+      'auth/invalid-login-credentials': 'Invalid email or password.'
+    }[error.code] || error.message;
+    setMessage(loginMessage, message);
   }
 });
 
-logoutButton.addEventListener('click', () => {
+logoutButton?.addEventListener('click', () => {
   firebaseAuth.signOut();
   loginForm.reset();
   setMessage(loginMessage, '');
   showLogin();
 });
 
+adminForgotPassword?.addEventListener('click', async () => {
+  const email = loginForm?.username.value.trim();
+  if (!email) return setMessage(loginMessage, 'Enter the admin email first, then choose forgot password.');
+  try {
+    await firebaseAuth.sendPasswordResetEmail(email);
+    setMessage(loginMessage, 'Password reset instructions were sent to the admin email.');
+  } catch (error) {
+    setMessage(loginMessage, error.code === 'auth/user-not-found' ? 'No Firebase account exists for this email.' : error.message);
+  }
+});
+
 firebaseAuth.onAuthStateChanged((user) => {
   if (!user) return showLogin();
   user.getIdTokenResult(true).then((tokenResult) => {
-    if (tokenResult.claims.admin !== true) {
+    const isFallbackAdmin = user.email?.toLowerCase() === fallbackAdminEmail;
+    if (tokenResult.claims.admin !== true && !isFallbackAdmin) {
       setMessage(loginMessage, 'Admin access is not enabled for this account. Ask the site owner to assign the admin role, then sign in again.');
       return firebaseAuth.signOut();
     }

@@ -13,6 +13,38 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- ============================ ACCOUNT ENTRY GATE ============================ -->
+  <section class="entry-gate" id="entryGate" aria-label="Account sign in">
+    <div class="entry-gate-panel">
+      <p class="section-tag">SRI EXPLORE</p>
+      <h1>Begin your next journey</h1>
+      <p class="entry-gate-intro">Sign in to explore destinations, build trip plans and keep your bookings connected to one unique account ID.</p>
+      <div class="auth-tabs" role="tablist" aria-label="Entry actions">
+        <button class="auth-tab active" id="entryLoginTab" type="button">Sign in</button>
+        <button class="auth-tab" id="entryRegisterTab" type="button">Create account</button>
+      </div>
+      <form id="entryLoginForm" class="auth-form">
+        <label for="entryLoginEmail">Email</label>
+        <input id="entryLoginEmail" type="email" autocomplete="username" required>
+        <label for="entryLoginPassword">Password</label>
+        <input id="entryLoginPassword" type="password" autocomplete="current-password" required>
+        <button class="btn btn-primary" type="submit">Enter SRI Explore</button>
+        <button class="auth-link" id="entryForgotPassword" type="button">Forgot password?</button>
+        <p class="form-message" id="entryLoginMessage" role="alert"></p>
+      </form>
+      <form id="entryRegisterForm" class="auth-form" hidden>
+        <label for="entryName">Name</label>
+        <input id="entryName" autocomplete="name" required>
+        <label for="entryEmail">Email</label>
+        <input id="entryEmail" type="email" autocomplete="email" required>
+        <label for="entryPassword">Unique password</label>
+        <input id="entryPassword" type="password" autocomplete="new-password" minlength="8" required>
+        <button class="btn btn-primary" type="submit">Create and enter</button>
+        <p class="form-message" id="entryRegisterMessage" role="alert"></p>
+      </form>
+      <p class="entry-gate-note">Your unique account ID is generated securely after registration.</p>
+    </div>
+  </section>
   <!-- ============================ NAVBAR ============================ -->
   <header class="navbar" id="navbar">
     <a href="#home" class="logo">🌍 SRI EXPLORE</a>
@@ -24,6 +56,7 @@
         <li><a href="#experiences" class="nav-link">Experiences</a></li>
         <li><a href="#about" class="nav-link">About Us</a></li>
         <li><a href="#contact" class="nav-link">Contact</a></li>
+        <li><a href="#account" class="nav-link">Account</a></li>
         <li><a href="#admin" class="nav-link">Admin</a></li>
       </ul>
     </nav>
@@ -653,6 +686,49 @@
       </div>
     </div>
   </section>
+  <!-- ============================ USER ACCOUNT ============================ -->
+  <section class="auth-section section" id="account">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-tag">Your account</span>
+        <h2 class="section-title">Plan trips with your own account</h2>
+        <p class="section-subtitle">Sign in with email, keep your unique account ID, and reset your password by email whenever needed.</p>
+      </div>
+      <div class="auth-panel" id="userAuthPanel">
+        <div class="auth-tabs" role="tablist" aria-label="Account actions">
+          <button class="auth-tab active" id="userLoginTab" type="button">Sign in</button>
+          <button class="auth-tab" id="userRegisterTab" type="button">Create account</button>
+        </div>
+        <form id="userLoginForm" class="auth-form">
+          <label for="userLoginEmail">Email</label>
+          <input id="userLoginEmail" type="email" autocomplete="username" required>
+          <label for="userLoginPassword">Password</label>
+          <input id="userLoginPassword" type="password" autocomplete="current-password" required>
+          <button class="btn btn-primary" type="submit">Sign in</button>
+          <button class="auth-link" id="userForgotPassword" type="button">Forgot password?</button>
+          <p class="form-message" id="userLoginMessage" role="alert"></p>
+        </form>
+        <form id="userRegisterForm" class="auth-form" hidden>
+          <label for="userName">Name</label>
+          <input id="userName" autocomplete="name" required>
+          <label for="userPhone">Mobile number</label>
+          <input id="userPhone" type="tel" autocomplete="tel" pattern="[+]?[0-9 ()-]{7,20}" required>
+          <label for="userRegisterEmail">Email</label>
+          <input id="userRegisterEmail" type="email" autocomplete="email" required>
+          <label for="userRegisterPassword">Password</label>
+          <input id="userRegisterPassword" type="password" autocomplete="new-password" minlength="8" required>
+          <button class="btn btn-primary" type="submit">Create account</button>
+          <p class="form-message" id="userRegisterMessage" role="alert"></p>
+        </form>
+        <div class="auth-account" id="userAccountDetails" hidden>
+          <h3>You are signed in</h3>
+          <p id="userAccountEmail"></p>
+          <p>Your unique account ID: <strong id="userAccountId"></strong></p>
+          <button class="btn btn-outline" id="userLogout" type="button">Log out</button>
+        </div>
+      </div>
+    </div>
+  </section>
   <!-- ============================ ADMIN ============================ -->
   <section class="admin-section section section-grey" id="admin">
     <div class="admin-shell">
@@ -666,6 +742,7 @@
           <label for="password">Password</label>
           <input id="password" name="password" type="password" autocomplete="current-password" required>
           <button type="submit">Sign in</button>
+          <button class="auth-link" id="adminForgotPassword" type="button">Forgot admin password?</button>
           <p class="form-message" id="loginMessage" role="alert"></p>
         </form>
       </section>
@@ -773,6 +850,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js"></script>
   <script src="script.js"></script>
+  <script src="auth.js"></script>
   <script src="admin.js"></script>
 </body>
 </html>

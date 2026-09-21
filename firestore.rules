@@ -2,6 +2,16 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null
+        && (request.auth.token.admin == true
+          || request.auth.token.email == 'sridhar.govindan2008@gmail.com');
+    }
+
+    match /users/{userId} {
+      allow create, read, update: if request.auth != null && request.auth.uid == userId;
+    }
+
     match /submissions/{submissionId} {
       allow create: if request.resource.data.keys().hasOnly([
           'type', 'email', 'createdAt', 'name', 'phone', 'state', 'destination', 'packageId', 'travelers', 'stayDays', 'hotelPlan', 'transport', 'estimatedPrice', 'suggestion', 'tripPlan'
@@ -36,8 +46,7 @@ service cloud.firestore {
             && request.resource.data.suggestion.size() > 0
             && request.resource.data.suggestion.size() <= 2000
             && request.resource.data.tripPlan is map));
-      allow read, update, delete: if request.auth != null
-        && request.auth.token.admin == true;
+      allow read, update, delete: if isAdmin();
     }
   }
 }

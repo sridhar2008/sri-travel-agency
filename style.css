@@ -116,6 +116,24 @@ input:focus, select:focus, textarea:focus { border-color: var(--blue); }
 .pricing-note { margin: 0 0 6px; }
 .pricing-sources a { color: var(--blue); text-decoration: underline; }
 .admin-shell { width: min(1320px, calc(100% - 40px)); margin: auto; }
+.entry-gate { position: fixed; z-index: 100; inset: 0; display: grid; place-items: center; padding: 24px; overflow-y: auto; background: linear-gradient(135deg, rgba(16,42,67,.97), rgba(23,105,170,.95)); }
+.entry-gate[hidden] { display: none; }
+.entry-gate-panel { width: min(470px, 100%); padding: 38px; border-radius: 8px; background: var(--paper); box-shadow: 0 24px 70px rgba(0,0,0,.28); }
+.entry-gate-panel h1 { margin: 8px 0; color: var(--navy); font-size: clamp(1.8rem, 5vw, 2.5rem); line-height: 1.15; }
+.entry-gate-intro { margin-bottom: 24px; color: var(--muted); font-size: .9rem; }
+.entry-gate-note { margin-top: 20px; color: var(--muted); font-size: .76rem; text-align: center; }
+.auth-section { background: var(--sky); }
+.contact-grid .reveal { opacity: 1; transform: none; }
+.auth-panel { width: min(520px, 100%); margin: auto; padding: 30px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); box-shadow: var(--shadow); }
+.auth-tabs { display: flex; gap: 8px; margin-bottom: 22px; border-bottom: 1px solid var(--line); }
+.auth-tab { padding: 10px 14px; border: 0; color: var(--muted); background: transparent; font-weight: 700; }
+.auth-tab.active { color: var(--blue); border-bottom: 3px solid var(--blue); }
+.auth-form { display: grid; gap: 8px; }
+.auth-form label { margin-top: 6px; font-size: .85rem; font-weight: 700; }
+.auth-form button[type="submit"] { margin-top: 12px; }
+.auth-link { padding: 4px 0; border: 0; color: var(--blue); background: transparent; text-align: left; text-decoration: underline; }
+.auth-account { display: grid; gap: 12px; }
+.auth-account p { color: var(--muted); }
 .login-panel { width: min(440px, 100%); margin: 0 auto; padding: 38px; border-radius: 8px; background: var(--paper); box-shadow: var(--shadow); }
 .login-panel h2, .dashboard h2 { margin: 0 0 8px; color: var(--navy); }
 .admin-section .muted { margin: 0 0 28px; color: var(--muted); }

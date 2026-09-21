@@ -255,7 +255,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const analysis = document.getElementById('analysisBox');
     if (analysis) analysis.innerHTML = plan.spots.length > plan.days * 3 ? `<strong>Adjustment:</strong> ${plan.spots.length} places may be too many for ${plan.days} days. Consider ${Math.max(2, plan.days * 2)} to ${plan.days * 2 + 1} places to reduce travel fatigue.` : `<strong>Plan looks workable:</strong> ${plan.spots.length || 0} selected places across ${plan.days || 0} days, with ${plan.transport || 'transport'} capacity for ${plan.travelers || 0} travellers.`;
     const recommendation = document.getElementById('recommendationBox');
-    if (recommendation) recommendation.innerHTML = `<strong>Hotel:</strong> ${hotelName?.value || 'Local verified stay'} · ${hotelCategory} · ₹${hotelRates[hotelCategory].toLocaleString('en-IN')}/night<br><strong>Restaurant:</strong> ${document.getElementById('foodType')?.value || 'Vegetarian'} · ₹${foodRates[document.getElementById('foodType')?.value || 'Vegetarian'].toLocaleString('en-IN')}/person/day<br><strong>Transport:</strong> ${plan.transport || 'Choose vehicle'} · capacity ${vehicleCapacity[plan.transport] || '-'} · ₹${Math.round(plan.transportCost).toLocaleString('en-IN')}<br><strong>Route:</strong> ${plan.spots.join(' → ') || 'Choose places'}`;
+    if (recommendation) {
+      const foodType = document.getElementById('foodType')?.value || 'Vegetarian';
+      const hotelRate = hotelRates[hotelCategory] ?? hotelRates.standard;
+      const foodRate = foodRates[foodType] ?? foodRates.Vegetarian;
+      recommendation.innerHTML = `<strong>Hotel:</strong> ${hotelName?.value || 'Local verified stay'} · ${hotelCategory} · ₹${hotelRate.toLocaleString('en-IN')}/night<br><strong>Restaurant:</strong> ${foodType} · ₹${foodRate.toLocaleString('en-IN')}/person/day<br><strong>Transport:</strong> ${plan.transport || 'Choose vehicle'} · capacity ${vehicleCapacity[plan.transport] || '-'} · ₹${Math.round(plan.transportCost).toLocaleString('en-IN')}<br><strong>Route:</strong> ${plan.spots.join(' → ') || 'Choose places'}`;
+    }
     const costs = document.getElementById('costBreakdown');
     if (costs) costs.innerHTML = [['Hotel', plan.hotelCost], ['Food', plan.foodCost], ['Transport', plan.transportCost], ['Activities / other', plan.activities], ['Base trip cost', plan.baseCost], [`Service / advance (${plan.percent}%)`, plan.percentageAmount], ['Final trip cost', plan.finalCost], ['Cost per person', plan.perPerson]].map(([label, value], index) => `<div class="cost-line ${index > 5 ? 'total' : ''}"><span>${label}</span><strong>₹${Math.round(value).toLocaleString('en-IN')}</strong></div>`).join('');
     const final = document.getElementById('finalSummary');
